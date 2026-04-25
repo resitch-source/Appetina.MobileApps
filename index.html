@@ -1,0 +1,3001 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#1a0a00">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Appetina">
+<meta name="description" content="Appetina — Modern Filipino Cuisine Catering & Food Services">
+<link rel="manifest" href="manifest.json">
+<title>Appetina — Modern Filipino Cuisine</title>
+
+<!-- Fonts -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+
+<style>
+/* ═══════════════════════════════════════════
+   DESIGN SYSTEM — Appetina
+   Warm luxury editorial meets Filipino soul
+═══════════════════════════════════════════ */
+:root {
+  --black:       #0d0600;
+  --brown-deep:  #1a0a00;
+  --brown-rich:  #3d1c00;
+  --gold:        #c9922a;
+  --gold-light:  #e8b84b;
+  --cream:       #f5ede0;
+  --cream-warm:  #fffaf4;
+  --red-accent:  #b83232;
+  --text-dark:   #1a0a00;
+  --text-mid:    #5c3d1e;
+  --text-light:  #9c7a56;
+  --white:       #ffffff;
+  --surface:     rgba(255,250,244,0.97);
+  --overlay:     rgba(13,6,0,0.82);
+  --radius:      16px;
+  --radius-sm:   8px;
+  --shadow:      0 8px 40px rgba(61,28,0,0.18);
+  --shadow-lg:   0 24px 64px rgba(61,28,0,0.28);
+  --nav-h:       64px;
+  --bottom-h:    72px;
+  --font-display:'Playfair Display', Georgia, serif;
+  --font-body:   'DM Sans', sans-serif;
+  --transition:  all 0.3s cubic-bezier(0.4,0,0.2,1);
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html { 
+  font-size: 16px; 
+  -webkit-text-size-adjust: 100%;
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: var(--font-body);
+  background: var(--brown-deep);
+  color: var(--text-dark);
+  min-height: 100dvh;
+  overflow-x: hidden;
+  position: relative;
+}
+
+/* ── APP SHELL ──────────────────────────── */
+#app {
+  max-width: 430px;
+  margin: 0 auto;
+  min-height: 100dvh;
+  background: var(--cream-warm);
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  overflow: hidden;
+}
+
+/* ── TOP NAV ────────────────────────────── */
+.topnav {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  height: var(--nav-h);
+  background: var(--brown-deep);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 20px;
+  backdrop-filter: blur(12px);
+}
+
+.nav-logo {
+  font-family: var(--font-display);
+  font-size: 22px;
+  font-weight: 900;
+  color: var(--gold);
+  letter-spacing: -0.5px;
+  line-height: 1;
+}
+
+.nav-logo span {
+  color: var(--cream);
+  font-weight: 400;
+  font-style: italic;
+  font-size: 11px;
+  display: block;
+  letter-spacing: 2px;
+}
+
+.nav-right {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.cart-btn {
+  position: relative;
+  background: var(--gold);
+  border: none;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.cart-btn:active { transform: scale(0.93); }
+.cart-btn svg { width: 20px; height: 20px; color: var(--brown-deep); }
+
+.cart-count {
+  position: absolute;
+  top: -4px; right: -4px;
+  background: var(--red-accent);
+  color: white;
+  font-size: 10px;
+  font-weight: 700;
+  width: 18px; height: 18px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transform: scale(0);
+  transition: var(--transition);
+}
+
+.cart-count.visible { opacity: 1; transform: scale(1); }
+
+/* ── PAGES ──────────────────────────────── */
+.page {
+  flex: 1;
+  display: none;
+  flex-direction: column;
+  overflow-y: auto;
+  padding-bottom: calc(var(--bottom-h) + 16px);
+  -webkit-overflow-scrolling: touch;
+}
+
+.page.active { display: flex; }
+
+/* ── BOTTOM NAV ─────────────────────────── */
+.bottomnav {
+  position: sticky;
+  bottom: 0;
+  z-index: 100;
+  height: var(--bottom-h);
+  background: var(--brown-deep);
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  padding: 0 8px;
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+.nav-tab {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 8px 4px;
+  cursor: pointer;
+  border: none;
+  background: none;
+  color: var(--text-light);
+  transition: var(--transition);
+  border-radius: var(--radius-sm);
+}
+
+.nav-tab svg { width: 22px; height: 22px; }
+.nav-tab span { font-size: 10px; font-weight: 500; letter-spacing: 0.5px; }
+
+.nav-tab.active {
+  color: var(--gold);
+}
+
+.nav-tab.active svg { filter: drop-shadow(0 0 6px rgba(201,146,42,0.5)); }
+
+/* ═══════════════════════════════════════════
+   HOME PAGE
+═══════════════════════════════════════════ */
+.hero {
+  position: relative;
+  height: 280px;
+  background: linear-gradient(135deg, #3d1c00 0%, #1a0a00 60%, #2d1500 100%);
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.hero-bg {
+  position: absolute;
+  inset: 0;
+  background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 280"><defs><radialGradient id="a" cx="50%25" cy="50%25"><stop offset="0%25" stop-color="%23c9922a" stop-opacity="0.15"/><stop offset="100%25" stop-color="%23c9922a" stop-opacity="0"/></radialGradient></defs><rect fill="url(%23a)" width="400" height="280"/><circle cx="320" cy="60" r="120" fill="%23c9922a" fill-opacity="0.06"/><circle cx="40" cy="220" r="80" fill="%23c9922a" fill-opacity="0.04"/></svg>') center/cover;
+}
+
+.hero-pattern {
+  position: absolute;
+  inset: 0;
+  opacity: 0.03;
+  background-image: repeating-linear-gradient(
+    45deg,
+    transparent,
+    transparent 20px,
+    rgba(201,146,42,1) 20px,
+    rgba(201,146,42,1) 21px
+  );
+}
+
+.hero-content {
+  position: relative;
+  z-index: 2;
+  padding: 36px 24px 24px;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.hero-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(201,146,42,0.2);
+  border: 1px solid rgba(201,146,42,0.4);
+  color: var(--gold-light);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  padding: 5px 12px;
+  border-radius: 20px;
+  width: fit-content;
+}
+
+.hero-title {
+  font-family: var(--font-display);
+  font-size: 36px;
+  font-weight: 900;
+  color: var(--cream);
+  line-height: 1.1;
+  margin: 12px 0 4px;
+}
+
+.hero-title em {
+  color: var(--gold);
+  font-style: italic;
+}
+
+.hero-sub {
+  color: rgba(245,237,224,0.65);
+  font-size: 13px;
+  font-weight: 300;
+  letter-spacing: 0.5px;
+}
+
+.hero-cta {
+  display: flex;
+  gap: 10px;
+}
+
+.btn-primary {
+  background: var(--gold);
+  color: var(--brown-deep);
+  border: none;
+  padding: 12px 22px;
+  border-radius: 50px;
+  font-family: var(--font-body);
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  cursor: pointer;
+  transition: var(--transition);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.btn-primary:active { transform: scale(0.96); background: var(--gold-light); }
+
+.btn-outline {
+  background: transparent;
+  color: var(--cream);
+  border: 1.5px solid rgba(245,237,224,0.35);
+  padding: 12px 20px;
+  border-radius: 50px;
+  font-family: var(--font-body);
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.btn-outline:active { background: rgba(255,255,255,0.08); }
+
+/* Event types */
+.event-types {
+  display: flex;
+  gap: 10px;
+  padding: 20px 20px 0;
+  overflow-x: auto;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  flex-shrink: 0;
+}
+.event-types::-webkit-scrollbar { display: none; }
+
+.event-chip {
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.event-chip:active { transform: scale(0.93); }
+
+.event-icon {
+  width: 52px; height: 52px;
+  background: var(--cream);
+  border-radius: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+  border: 2px solid transparent;
+  transition: var(--transition);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+}
+
+.event-chip.active .event-icon,
+.event-chip:hover .event-icon {
+  border-color: var(--gold);
+  background: #fff9ee;
+  box-shadow: 0 4px 20px rgba(201,146,42,0.25);
+}
+
+.event-chip span {
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--text-mid);
+  letter-spacing: 0.5px;
+  white-space: nowrap;
+}
+
+/* Section headers */
+.section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 24px 20px 12px;
+}
+
+.section-title {
+  font-family: var(--font-display);
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--text-dark);
+}
+
+.see-all {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--gold);
+  background: none;
+  border: none;
+  cursor: pointer;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+}
+
+/* Menu cards */
+.menu-scroll {
+  display: flex;
+  gap: 14px;
+  padding: 0 20px 4px;
+  overflow-x: auto;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+.menu-scroll::-webkit-scrollbar { display: none; }
+
+.menu-card {
+  flex-shrink: 0;
+  width: 160px;
+  background: white;
+  border-radius: var(--radius);
+  overflow: hidden;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+  cursor: pointer;
+  transition: var(--transition);
+  border: 1.5px solid transparent;
+}
+
+.menu-card:active {
+  transform: scale(0.97);
+  border-color: var(--gold);
+}
+
+.menu-card-img {
+  height: 110px;
+  font-size: 52px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  overflow: hidden;
+}
+
+.menu-card-body { padding: 12px; }
+
+.menu-card-name {
+  font-family: var(--font-display);
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text-dark);
+  line-height: 1.3;
+  margin-bottom: 4px;
+}
+
+.menu-card-desc {
+  font-size: 11px;
+  color: var(--text-light);
+  line-height: 1.4;
+  margin-bottom: 8px;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.menu-card-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.menu-price {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--brown-rich);
+}
+
+.menu-price small { font-size: 10px; color: var(--text-light); font-weight: 400; }
+
+.add-btn {
+  width: 28px; height: 28px;
+  background: var(--gold);
+  border: none;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: var(--transition);
+  color: var(--brown-deep);
+  font-size: 18px;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.add-btn:active { transform: scale(0.88); }
+
+/* Promo banner */
+.promo-banner {
+  margin: 20px;
+  background: linear-gradient(120deg, var(--brown-rich) 0%, #5c2a00 100%);
+  border-radius: var(--radius);
+  padding: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: relative;
+  overflow: hidden;
+}
+
+.promo-banner::after {
+  content: '🥘';
+  position: absolute;
+  right: 16px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 56px;
+  opacity: 0.18;
+}
+
+.promo-tag {
+  background: var(--red-accent);
+  color: white;
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  padding: 3px 8px;
+  border-radius: 4px;
+  margin-bottom: 8px;
+  width: fit-content;
+}
+
+.promo-title {
+  font-family: var(--font-display);
+  font-size: 18px;
+  font-weight: 800;
+  color: var(--cream);
+  margin-bottom: 4px;
+}
+
+.promo-sub {
+  font-size: 11px;
+  color: rgba(245,237,224,0.6);
+  margin-bottom: 14px;
+}
+
+/* Testimonials */
+.testimonials { padding: 0 20px; display: flex; flex-direction: column; gap: 12px; }
+
+.testimonial-card {
+  background: white;
+  border-radius: var(--radius);
+  padding: 16px;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+}
+
+.test-stars { color: var(--gold); font-size: 13px; margin-bottom: 8px; }
+.test-quote { font-size: 13px; color: var(--text-mid); line-height: 1.6; font-style: italic; margin-bottom: 10px; }
+.test-author { font-size: 11px; font-weight: 700; color: var(--text-dark); }
+.test-event { font-size: 10px; color: var(--text-light); }
+
+/* ═══════════════════════════════════════════
+   MENU PAGE
+═══════════════════════════════════════════ */
+.menu-header {
+  background: var(--brown-deep);
+  padding: 24px 20px 16px;
+  flex-shrink: 0;
+}
+
+.menu-header-title {
+  font-family: var(--font-display);
+  font-size: 26px;
+  font-weight: 900;
+  color: var(--cream);
+  margin-bottom: 4px;
+}
+
+.menu-header-sub {
+  font-size: 12px;
+  color: rgba(245,237,224,0.5);
+  letter-spacing: 0.5px;
+}
+
+.menu-cats {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  padding: 16px 20px;
+  scrollbar-width: none;
+  flex-shrink: 0;
+  background: white;
+  border-bottom: 1px solid rgba(0,0,0,0.06);
+}
+.menu-cats::-webkit-scrollbar { display: none; }
+
+.cat-pill {
+  flex-shrink: 0;
+  padding: 8px 16px;
+  border-radius: 50px;
+  font-size: 12px;
+  font-weight: 600;
+  border: 1.5px solid rgba(0,0,0,0.1);
+  color: var(--text-mid);
+  background: transparent;
+  cursor: pointer;
+  transition: var(--transition);
+  white-space: nowrap;
+}
+
+.cat-pill.active {
+  background: var(--brown-deep);
+  color: var(--gold);
+  border-color: var(--brown-deep);
+}
+
+.menu-grid {
+  padding: 16px 16px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+}
+
+.menu-grid-card {
+  background: white;
+  border-radius: var(--radius);
+  overflow: hidden;
+  box-shadow: 0 3px 16px rgba(0,0,0,0.08);
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.menu-grid-card:active { transform: scale(0.97); }
+
+.mgc-img {
+  height: 120px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 56px;
+  position: relative;
+}
+
+.mgc-body { padding: 10px 10px 12px; }
+
+.mgc-category {
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: var(--gold);
+  margin-bottom: 4px;
+}
+
+.mgc-name {
+  font-family: var(--font-display);
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text-dark);
+  margin-bottom: 3px;
+  line-height: 1.3;
+}
+
+.mgc-desc {
+  font-size: 10px;
+  color: var(--text-light);
+  line-height: 1.5;
+  margin-bottom: 8px;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.mgc-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.mgc-price {
+  font-size: 14px;
+  font-weight: 800;
+  color: var(--brown-rich);
+}
+
+/* ═══════════════════════════════════════════
+   ORDER / INQUIRY PAGE
+═══════════════════════════════════════════ */
+.order-page { background: var(--cream-warm); }
+
+.order-header {
+  background: var(--brown-deep);
+  padding: 24px 20px;
+  flex-shrink: 0;
+}
+
+.order-header-title {
+  font-family: var(--font-display);
+  font-size: 24px;
+  font-weight: 900;
+  color: var(--cream);
+}
+
+.order-header-sub {
+  font-size: 12px;
+  color: rgba(245,237,224,0.5);
+  margin-top: 2px;
+}
+
+.order-form { padding: 20px; display: flex; flex-direction: column; gap: 16px; }
+
+.form-group { display: flex; flex-direction: column; gap: 6px; }
+
+.form-label {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--text-mid);
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+
+.form-input, .form-select, .form-textarea {
+  width: 100%;
+  padding: 14px 16px;
+  border: 1.5px solid rgba(61,28,0,0.12);
+  border-radius: var(--radius-sm);
+  font-family: var(--font-body);
+  font-size: 14px;
+  color: var(--text-dark);
+  background: white;
+  outline: none;
+  transition: var(--transition);
+  -webkit-appearance: none;
+}
+
+.form-input:focus, .form-select:focus, .form-textarea:focus {
+  border-color: var(--gold);
+  box-shadow: 0 0 0 3px rgba(201,146,42,0.12);
+}
+
+.form-textarea { resize: none; height: 90px; line-height: 1.6; }
+
+.form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+
+.cart-summary {
+  margin: 0 20px 16px;
+  background: white;
+  border-radius: var(--radius);
+  padding: 16px;
+  border: 1.5px solid rgba(201,146,42,0.25);
+}
+
+.cart-summary-title {
+  font-family: var(--font-display);
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--text-dark);
+  margin-bottom: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.cart-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 0;
+  border-bottom: 1px solid rgba(0,0,0,0.05);
+}
+
+.cart-item:last-child { border-bottom: none; }
+
+.cart-item-emoji { font-size: 24px; width: 36px; text-align: center; }
+
+.cart-item-info { flex: 1; }
+.cart-item-name { font-size: 13px; font-weight: 600; color: var(--text-dark); }
+.cart-item-price { font-size: 11px; color: var(--text-light); }
+
+.cart-item-qty {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.qty-btn {
+  width: 26px; height: 26px;
+  border: 1.5px solid rgba(0,0,0,0.12);
+  border-radius: 50%;
+  background: none;
+  font-size: 16px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-dark);
+  font-weight: 600;
+  transition: var(--transition);
+}
+
+.qty-btn:active { background: var(--cream); }
+.qty-num { font-size: 14px; font-weight: 700; color: var(--text-dark); min-width: 20px; text-align: center; }
+
+.cart-total {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 2px solid var(--cream);
+}
+
+.cart-total-label { font-size: 13px; font-weight: 700; color: var(--text-mid); }
+.cart-total-amount { font-family: var(--font-display); font-size: 20px; font-weight: 800; color: var(--brown-rich); }
+
+.empty-cart {
+  text-align: center;
+  padding: 24px 0;
+  color: var(--text-light);
+  font-size: 13px;
+}
+
+.empty-cart .emoji { font-size: 36px; margin-bottom: 8px; }
+
+.submit-btn {
+  width: 100%;
+  background: var(--brown-deep);
+  color: var(--gold);
+  border: none;
+  padding: 18px;
+  border-radius: var(--radius-sm);
+  font-family: var(--font-body);
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: var(--transition);
+  letter-spacing: 0.5px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin: 0 20px;
+  width: calc(100% - 40px);
+}
+
+.submit-btn:active { transform: scale(0.98); background: var(--brown-rich); }
+.submit-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+/* ═══════════════════════════════════════════
+   CHATBOT PAGE
+═══════════════════════════════════════════ */
+.chat-page { background: #f0ebe4; display: none; flex-direction: column; }
+.chat-page.active { display: flex; }
+
+.chat-header {
+  background: var(--brown-deep);
+  padding: 16px 20px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-shrink: 0;
+}
+
+.chat-avatar {
+  width: 42px; height: 42px;
+  background: var(--gold);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+  flex-shrink: 0;
+  box-shadow: 0 0 0 3px rgba(201,146,42,0.3);
+}
+
+.chat-header-info { flex: 1; }
+.chat-header-name {
+  font-weight: 700;
+  color: var(--cream);
+  font-size: 15px;
+}
+
+.chat-status {
+  font-size: 11px;
+  color: var(--gold-light);
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.status-dot {
+  width: 6px; height: 6px;
+  background: #4ade80;
+  border-radius: 50%;
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.4; }
+}
+
+.chat-messages {
+  flex: 1;
+  overflow-y: auto;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  -webkit-overflow-scrolling: touch;
+}
+
+.msg {
+  display: flex;
+  gap: 8px;
+  max-width: 88%;
+  animation: slideIn 0.3s ease;
+}
+
+@keyframes slideIn {
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.msg.user { flex-direction: row-reverse; align-self: flex-end; }
+.msg.bot  { align-self: flex-start; }
+
+.msg-avatar {
+  width: 30px; height: 30px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  align-self: flex-end;
+}
+
+.msg.bot .msg-avatar { background: var(--gold); }
+.msg.user .msg-avatar { background: var(--brown-rich); }
+
+.msg-bubble {
+  padding: 11px 14px;
+  border-radius: 18px;
+  font-size: 13.5px;
+  line-height: 1.55;
+  max-width: 100%;
+  word-wrap: break-word;
+}
+
+.msg.bot .msg-bubble {
+  background: white;
+  color: var(--text-dark);
+  border-bottom-left-radius: 4px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+}
+
+.msg.user .msg-bubble {
+  background: var(--brown-deep);
+  color: var(--cream);
+  border-bottom-right-radius: 4px;
+}
+
+.msg-time {
+  font-size: 10px;
+  color: var(--text-light);
+  margin-top: 3px;
+  align-self: flex-end;
+}
+
+.typing-indicator {
+  display: flex;
+  gap: 4px;
+  padding: 14px 18px;
+  background: white;
+  border-radius: 18px;
+  border-bottom-left-radius: 4px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+  width: fit-content;
+}
+
+.dot {
+  width: 7px; height: 7px;
+  background: var(--gold);
+  border-radius: 50%;
+  animation: bounce 1.2s infinite;
+}
+
+.dot:nth-child(2) { animation-delay: 0.2s; }
+.dot:nth-child(3) { animation-delay: 0.4s; }
+
+@keyframes bounce {
+  0%, 60%, 100% { transform: translateY(0); }
+  30% { transform: translateY(-8px); }
+}
+
+/* Quick replies */
+.quick-replies {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-top: 4px;
+}
+
+.qr-btn {
+  padding: 7px 13px;
+  background: white;
+  border: 1.5px solid rgba(201,146,42,0.4);
+  border-radius: 50px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--brown-rich);
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.qr-btn:active {
+  background: var(--gold);
+  color: var(--brown-deep);
+  border-color: var(--gold);
+}
+
+.chat-input-area {
+  padding: 12px 16px;
+  background: white;
+  display: flex;
+  gap: 10px;
+  align-items: flex-end;
+  border-top: 1px solid rgba(0,0,0,0.07);
+  flex-shrink: 0;
+}
+
+.chat-input {
+  flex: 1;
+  background: #f5ede0;
+  border: 1.5px solid transparent;
+  border-radius: 22px;
+  padding: 11px 16px;
+  font-family: var(--font-body);
+  font-size: 14px;
+  color: var(--text-dark);
+  outline: none;
+  resize: none;
+  max-height: 100px;
+  transition: var(--transition);
+  line-height: 1.4;
+}
+
+.chat-input:focus { border-color: var(--gold); }
+
+.chat-send {
+  width: 42px; height: 42px;
+  background: var(--gold);
+  border: none;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: var(--transition);
+  flex-shrink: 0;
+  color: var(--brown-deep);
+}
+
+.chat-send:active { transform: scale(0.92); }
+.chat-send svg { width: 18px; height: 18px; }
+
+/* ═══════════════════════════════════════════
+   PROFILE PAGE
+═══════════════════════════════════════════ */
+.profile-header {
+  background: linear-gradient(135deg, var(--brown-deep) 0%, var(--brown-rich) 100%);
+  padding: 36px 20px 24px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  flex-shrink: 0;
+}
+
+.profile-avatar {
+  width: 80px; height: 80px;
+  background: var(--gold);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 36px;
+  border: 3px solid rgba(255,255,255,0.2);
+}
+
+.profile-name {
+  font-family: var(--font-display);
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--cream);
+}
+
+.profile-email { font-size: 13px; color: rgba(245,237,224,0.55); }
+
+.profile-stats {
+  display: flex;
+  gap: 0;
+  background: white;
+  margin: 20px;
+  border-radius: var(--radius);
+  overflow: hidden;
+  box-shadow: var(--shadow);
+}
+
+.stat-item {
+  flex: 1;
+  padding: 16px 12px;
+  text-align: center;
+  border-right: 1px solid rgba(0,0,0,0.06);
+}
+
+.stat-item:last-child { border-right: none; }
+.stat-num { font-family: var(--font-display); font-size: 22px; font-weight: 800; color: var(--brown-rich); }
+.stat-label { font-size: 10px; color: var(--text-light); font-weight: 600; letter-spacing: 0.5px; margin-top: 2px; }
+
+.settings-list { padding: 0 20px; display: flex; flex-direction: column; gap: 10px; }
+
+.settings-section-label {
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--text-light);
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  margin-top: 8px;
+}
+
+.settings-item {
+  background: white;
+  border-radius: var(--radius-sm);
+  padding: 14px 16px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  cursor: pointer;
+  transition: var(--transition);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+}
+
+.settings-item:active { background: var(--cream); }
+
+.settings-item-icon {
+  width: 36px; height: 36px;
+  background: var(--cream);
+  border-radius: var(--radius-sm);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+}
+
+.settings-item-text { flex: 1; }
+.settings-item-title { font-size: 14px; font-weight: 600; color: var(--text-dark); }
+.settings-item-sub { font-size: 11px; color: var(--text-light); margin-top: 1px; }
+
+.settings-item-arrow { color: var(--text-light); font-size: 18px; }
+
+/* ═══════════════════════════════════════════
+   PACKAGES PAGE
+═══════════════════════════════════════════ */
+.pkg-header {
+  background: linear-gradient(135deg, #1a0a00 0%, #3d1c00 100%);
+  padding: 28px 20px 20px;
+  flex-shrink: 0;
+  position: relative;
+  overflow: hidden;
+}
+
+.pkg-header::after {
+  content: '🍽️';
+  position: absolute;
+  right: 20px; top: 50%;
+  transform: translateY(-50%);
+  font-size: 72px;
+  opacity: 0.07;
+}
+
+.pkg-header-title {
+  font-family: var(--font-display);
+  font-size: 26px;
+  font-weight: 900;
+  color: var(--cream);
+  margin-bottom: 4px;
+}
+
+.pkg-header-sub {
+  font-size: 12px;
+  color: rgba(245,237,224,0.5);
+  letter-spacing: 0.5px;
+}
+
+/* Event filter tabs */
+.pkg-filter {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  padding: 16px 20px;
+  scrollbar-width: none;
+  background: white;
+  border-bottom: 1px solid rgba(0,0,0,0.06);
+  flex-shrink: 0;
+}
+.pkg-filter::-webkit-scrollbar { display: none; }
+
+.pkg-filter-pill {
+  flex-shrink: 0;
+  padding: 8px 16px;
+  border-radius: 50px;
+  font-size: 12px;
+  font-weight: 600;
+  border: 1.5px solid rgba(0,0,0,0.1);
+  color: var(--text-mid);
+  background: transparent;
+  cursor: pointer;
+  transition: var(--transition);
+  white-space: nowrap;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.pkg-filter-pill.active {
+  background: var(--brown-deep);
+  color: var(--gold);
+  border-color: var(--brown-deep);
+}
+
+/* Packages list */
+.pkg-list {
+  padding: 20px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.pkg-card {
+  background: white;
+  border-radius: var(--radius);
+  overflow: hidden;
+  box-shadow: 0 4px 24px rgba(61,28,0,0.10);
+  border: 1.5px solid rgba(201,146,42,0.12);
+  transition: var(--transition);
+  position: relative;
+}
+
+.pkg-card.featured {
+  border-color: var(--gold);
+  box-shadow: 0 6px 32px rgba(201,146,42,0.22);
+}
+
+.pkg-badge {
+  position: absolute;
+  top: 14px; right: 14px;
+  background: var(--gold);
+  color: var(--brown-deep);
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  padding: 4px 10px;
+  border-radius: 50px;
+  z-index: 2;
+}
+
+.pkg-badge.new { background: var(--red-accent); color: white; }
+.pkg-badge.best { background: var(--gold); color: var(--brown-deep); }
+
+.pkg-card-header {
+  padding: 20px 20px 16px;
+  position: relative;
+}
+
+.pkg-tier {
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--gold);
+  margin-bottom: 4px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.pkg-name {
+  font-family: var(--font-display);
+  font-size: 22px;
+  font-weight: 900;
+  color: var(--text-dark);
+  line-height: 1.1;
+  margin-bottom: 6px;
+}
+
+.pkg-pax {
+  font-size: 12px;
+  color: var(--text-light);
+  font-weight: 500;
+}
+
+.pkg-price-row {
+  display: flex;
+  align-items: flex-end;
+  gap: 8px;
+  margin: 14px 0 0;
+  padding-top: 14px;
+  border-top: 1px solid rgba(0,0,0,0.06);
+}
+
+.pkg-price {
+  font-family: var(--font-display);
+  font-size: 30px;
+  font-weight: 900;
+  color: var(--brown-rich);
+  line-height: 1;
+}
+
+.pkg-price-note {
+  font-size: 11px;
+  color: var(--text-light);
+  padding-bottom: 3px;
+  line-height: 1.4;
+}
+
+.pkg-price-per {
+  margin-left: auto;
+  text-align: right;
+}
+
+.pkg-price-pax {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--gold);
+}
+
+.pkg-price-pax small { font-size: 10px; font-weight: 400; color: var(--text-light); }
+
+/* Inclusions */
+.pkg-divider {
+  height: 1px;
+  background: rgba(0,0,0,0.05);
+  margin: 0 20px;
+}
+
+.pkg-inclusions {
+  padding: 16px 20px 0;
+}
+
+.pkg-inc-title {
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: var(--text-light);
+  margin-bottom: 10px;
+}
+
+.pkg-inc-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px;
+  margin-bottom: 12px;
+}
+
+.pkg-inc-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 7px;
+  font-size: 12px;
+  color: var(--text-dark);
+  line-height: 1.4;
+}
+
+.pkg-inc-item .check {
+  color: var(--gold);
+  font-size: 13px;
+  margin-top: 1px;
+  flex-shrink: 0;
+}
+
+.pkg-inc-item.full-width {
+  grid-column: 1 / -1;
+}
+
+/* Dishes */
+.pkg-dishes {
+  padding: 0 20px 16px;
+}
+
+.pkg-dishes-title {
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: var(--text-light);
+  margin-bottom: 8px;
+}
+
+.pkg-dish-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.pkg-dish-chip {
+  background: var(--cream);
+  border-radius: 50px;
+  padding: 5px 10px;
+  font-size: 11px;
+  color: var(--text-mid);
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+/* CTA */
+.pkg-cta {
+  padding: 16px 20px 20px;
+  display: flex;
+  gap: 10px;
+}
+
+.pkg-book-btn {
+  flex: 1;
+  background: var(--brown-deep);
+  color: var(--gold);
+  border: none;
+  padding: 14px;
+  border-radius: var(--radius-sm);
+  font-family: var(--font-body);
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: var(--transition);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+
+.pkg-book-btn:active { transform: scale(0.97); background: var(--brown-rich); }
+
+.pkg-book-btn.gold {
+  background: var(--gold);
+  color: var(--brown-deep);
+}
+
+.pkg-chat-btn {
+  background: var(--cream);
+  border: 1.5px solid rgba(0,0,0,0.1);
+  color: var(--text-mid);
+  padding: 14px 16px;
+  border-radius: var(--radius-sm);
+  font-family: var(--font-body);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.pkg-chat-btn:active { background: white; }
+
+/* Comparison table */
+.pkg-compare {
+  margin: 0 16px 20px;
+  background: white;
+  border-radius: var(--radius);
+  overflow: hidden;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.07);
+}
+
+.pkg-compare-title {
+  background: var(--brown-deep);
+  color: var(--gold);
+  font-family: var(--font-display);
+  font-size: 15px;
+  font-weight: 700;
+  padding: 14px 16px;
+}
+
+.compare-row {
+  display: flex;
+  border-bottom: 1px solid rgba(0,0,0,0.05);
+}
+
+.compare-row:last-child { border-bottom: none; }
+
+.compare-row.header {
+  background: var(--cream);
+}
+
+.compare-cell {
+  flex: 1;
+  padding: 10px 12px;
+  font-size: 12px;
+  text-align: center;
+  color: var(--text-dark);
+  border-right: 1px solid rgba(0,0,0,0.05);
+}
+
+.compare-cell:last-child { border-right: none; }
+
+.compare-cell:first-child {
+  flex: 1.4;
+  text-align: left;
+  font-weight: 600;
+  color: var(--text-mid);
+}
+
+.compare-row.header .compare-cell {
+  font-size: 11px;
+  font-weight: 800;
+  color: var(--brown-rich);
+  letter-spacing: 0.5px;
+}
+
+.compare-check { color: #22c55e; font-size: 14px; }
+.compare-cross { color: #e5e7eb; font-size: 14px; }
+
+/* Addons */
+.pkg-addons {
+  margin: 0 16px 20px;
+  background: white;
+  border-radius: var(--radius);
+  overflow: hidden;
+  box-shadow: 0 3px 12px rgba(0,0,0,0.06);
+}
+
+.pkg-addons-title {
+  background: var(--cream);
+  padding: 12px 16px;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: var(--text-mid);
+}
+
+.addon-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  border-bottom: 1px solid rgba(0,0,0,0.05);
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.addon-item:last-child { border-bottom: none; }
+.addon-item:active { background: var(--cream-warm); }
+
+.addon-emoji { font-size: 22px; width: 32px; text-align: center; }
+.addon-info { flex: 1; }
+.addon-name { font-size: 13px; font-weight: 600; color: var(--text-dark); }
+.addon-desc { font-size: 11px; color: var(--text-light); }
+.addon-price { font-size: 13px; font-weight: 700; color: var(--brown-rich); white-space: nowrap; }
+
+/* ═══════════════════════════════════════════
+   TOAST / SUCCESS MODAL
+═══════════════════════════════════════════ */
+.toast {
+  position: fixed;
+  top: 80px;
+  left: 50%;
+  transform: translateX(-50%) translateY(-20px);
+  background: var(--brown-deep);
+  color: var(--cream);
+  padding: 12px 20px;
+  border-radius: 50px;
+  font-size: 13px;
+  font-weight: 600;
+  z-index: 9999;
+  opacity: 0;
+  pointer-events: none;
+  transition: all 0.4s cubic-bezier(0.4,0,0.2,1);
+  white-space: nowrap;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  max-width: 90%;
+}
+
+.toast.show {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+
+/* ═══════════════════════════════════════════
+   LOADING / SUCCESS OVERLAY
+═══════════════════════════════════════════ */
+.success-modal {
+  position: fixed;
+  inset: 0;
+  background: var(--overlay);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9998;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s;
+}
+
+.success-modal.show { opacity: 1; pointer-events: all; }
+
+.success-card {
+  background: white;
+  border-radius: 24px;
+  padding: 36px 32px;
+  text-align: center;
+  max-width: 320px;
+  width: 90%;
+  transform: scale(0.85);
+  transition: transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.success-modal.show .success-card { transform: scale(1); }
+
+.success-icon { font-size: 56px; margin-bottom: 16px; }
+
+.success-title {
+  font-family: var(--font-display);
+  font-size: 22px;
+  font-weight: 800;
+  color: var(--text-dark);
+  margin-bottom: 8px;
+}
+
+.success-msg { font-size: 13px; color: var(--text-light); line-height: 1.6; margin-bottom: 20px; }
+
+.success-ref {
+  background: var(--cream);
+  border-radius: var(--radius-sm);
+  padding: 10px 16px;
+  font-size: 12px;
+  color: var(--text-mid);
+  margin-bottom: 20px;
+}
+
+.success-ref strong { color: var(--brown-rich); font-family: var(--font-display); }
+
+/* ═══════════════════════════════════════════
+   ANIMATIONS
+═══════════════════════════════════════════ */
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(24px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.fade-up { animation: fadeUp 0.5s ease both; }
+.delay-1 { animation-delay: 0.1s; }
+.delay-2 { animation-delay: 0.2s; }
+.delay-3 { animation-delay: 0.3s; }
+
+/* BG variants for menu items */
+.bg-1 { background: linear-gradient(135deg, #fff8ee 0%, #ffefd5 100%); }
+.bg-2 { background: linear-gradient(135deg, #fff0f0 0%, #ffe8e8 100%); }
+.bg-3 { background: linear-gradient(135deg, #f0fff4 0%, #e8ffe8 100%); }
+.bg-4 { background: linear-gradient(135deg, #f0f0ff 0%, #e8e8ff 100%); }
+.bg-5 { background: linear-gradient(135deg, #fff5f0 0%, #ffe8e0 100%); }
+.bg-6 { background: linear-gradient(135deg, #fffff0 0%, #ffffd0 100%); }
+
+/* Scrollbar */
+::-webkit-scrollbar { width: 4px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.12); border-radius: 2px; }
+</style>
+</head>
+<body>
+
+<div id="app">
+
+  <!-- ══ TOP NAV ══════════════════════════════ -->
+  <header class="topnav">
+    <div class="nav-logo">
+      Appetina
+      <span>Modern Filipino Cuisine</span>
+    </div>
+    <div class="nav-right">
+      <button class="cart-btn" onclick="goToOrder()" aria-label="Cart">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/>
+          <line x1="3" y1="6" x2="21" y2="6"/>
+          <path d="M16 10a4 4 0 01-8 0"/>
+        </svg>
+        <div class="cart-count" id="cartCount">0</div>
+      </button>
+    </div>
+  </header>
+
+  <!-- ══ HOME PAGE ═══════════════════════════ -->
+  <main class="page active" id="page-home">
+
+    <!-- Hero -->
+    <div class="hero">
+      <div class="hero-bg"></div>
+      <div class="hero-pattern"></div>
+      <div class="hero-content">
+        <div class="hero-tag">🍽️ &nbsp; Premium Catering</div>
+        <div>
+          <div class="hero-title">Food that makes<br><em>moments</em> unforgettable</div>
+          <div class="hero-sub">Weddings · Debuts · Corporate · Outdoor Events</div>
+        </div>
+        <div class="hero-cta">
+          <button class="btn-primary" onclick="showPage('menu')">
+            Browse Menu
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+          </button>
+          <button class="btn-outline" onclick="showPage('order')">Get a Quote</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Event Types -->
+    <div class="section-header" style="padding-bottom:0">
+      <div class="section-title">Plan Your Event</div>
+    </div>
+    <div class="event-types">
+      <div class="event-chip active" onclick="selectEvent(this,'Weddings')">
+        <div class="event-icon">💍</div>
+        <span>Weddings</span>
+      </div>
+      <div class="event-chip" onclick="selectEvent(this,'Debuts')">
+        <div class="event-icon">🌸</div>
+        <span>Debuts</span>
+      </div>
+      <div class="event-chip" onclick="selectEvent(this,'Corporate')">
+        <div class="event-icon">🏢</div>
+        <span>Corporate</span>
+      </div>
+      <div class="event-chip" onclick="selectEvent(this,'Birthday')">
+        <div class="event-icon">🎂</div>
+        <span>Birthday</span>
+      </div>
+      <div class="event-chip" onclick="selectEvent(this,'Outdoor')">
+        <div class="event-icon">🌿</div>
+        <span>Outdoor</span>
+      </div>
+      <div class="event-chip" onclick="selectEvent(this,'Memorial')">
+        <div class="event-icon">🕊️</div>
+        <span>Memorial</span>
+      </div>
+    </div>
+
+    <!-- Featured Menu -->
+    <div class="section-header">
+      <div class="section-title">Signature Dishes</div>
+      <button class="see-all" onclick="showPage('menu')">See All</button>
+    </div>
+    <div class="menu-scroll" id="featuredMenu"></div>
+
+    <!-- Promo Banner -->
+    <div class="promo-banner">
+      <div>
+        <div class="promo-tag">🔥 Limited Offer</div>
+        <div class="promo-title">Lechon Package<br>starts at ₱4,800</div>
+        <div class="promo-sub">Free delivery within Iligan City</div>
+        <button class="btn-primary" style="margin-top:12px; background:var(--gold-light)" onclick="showPage('order')">
+          Book Now
+        </button>
+      </div>
+    </div>
+
+    <!-- Testimonials -->
+    <div class="section-header">
+      <div class="section-title">Happy Clients</div>
+    </div>
+    <div class="testimonials">
+      <div class="testimonial-card fade-up">
+        <div class="test-stars">★★★★★</div>
+        <div class="test-quote">"Appetina made our wedding reception absolutely spectacular. The food was divine and the service was flawless from start to finish."</div>
+        <div class="test-author">Maria & Jose Santos</div>
+        <div class="test-event">Wedding Reception · Iligan City</div>
+      </div>
+      <div class="testimonial-card fade-up delay-1">
+        <div class="test-stars">★★★★★</div>
+        <div class="test-quote">"Our corporate dinner was a huge success! Guests couldn't stop praising the kare-kare and the lechon. Highly recommended!"</div>
+        <div class="test-author">Engr. Ramos</div>
+        <div class="test-event">Corporate Dinner · 120 pax</div>
+      </div>
+    </div>
+
+    <div style="height:16px"></div>
+  </main>
+
+  <!-- ══ MENU PAGE ════════════════════════════ -->
+  <main class="page" id="page-menu">
+    <div class="menu-header">
+      <div class="menu-header-title">Our Menu</div>
+      <div class="menu-header-sub">Authentic Filipino flavors, elevated</div>
+    </div>
+    <div class="menu-cats" id="menuCats"></div>
+    <div class="menu-grid" id="menuGrid"></div>
+  </main>
+
+  <!-- ══ ORDER PAGE ═══════════════════════════ -->
+  <main class="page" id="page-order">
+    <div class="order-header">
+      <div class="order-header-title">Book & Inquire</div>
+      <div class="order-header-sub">We'll get back to you within 2 hours</div>
+    </div>
+
+    <!-- Cart Summary -->
+    <div class="cart-summary" id="cartSummary">
+      <div class="cart-summary-title">
+        <span>🛒 Selected Items</span>
+        <button onclick="clearCart()" style="font-size:11px;color:var(--red-accent);background:none;border:none;cursor:pointer;font-weight:700;">Clear</button>
+      </div>
+      <div id="cartItems">
+        <div class="empty-cart">
+          <div class="emoji">🍽️</div>
+          <div>No items yet. Browse our menu!</div>
+        </div>
+      </div>
+      <div class="cart-total" id="cartTotal" style="display:none">
+        <div class="cart-total-label">Estimated Total</div>
+        <div class="cart-total-amount" id="cartTotalAmt">₱0</div>
+      </div>
+    </div>
+
+    <div class="order-form">
+      <div class="form-group">
+        <label class="form-label">Full Name *</label>
+        <input type="text" class="form-input" id="clientName" placeholder="Your full name">
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Phone *</label>
+          <input type="tel" class="form-input" id="clientPhone" placeholder="09XX XXX XXXX">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Email</label>
+          <input type="email" class="form-input" id="clientEmail" placeholder="you@email.com">
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Event Type *</label>
+        <select class="form-select" id="eventType">
+          <option value="">Select event type</option>
+          <option>Wedding Reception</option>
+          <option>Debut</option>
+          <option>Birthday Party</option>
+          <option>Corporate Event</option>
+          <option>Outdoor Catering</option>
+          <option>Memorial/Lunch</option>
+          <option>Other</option>
+        </select>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Event Date *</label>
+          <input type="date" class="form-input" id="eventDate">
+        </div>
+        <div class="form-group">
+          <label class="form-label">No. of Guests *</label>
+          <input type="number" class="form-input" id="guestCount" placeholder="e.g. 100" min="10">
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Venue / Location *</label>
+        <input type="text" class="form-input" id="venue" placeholder="Event venue or address">
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Special Requests / Notes</label>
+        <textarea class="form-textarea" id="notes" placeholder="Dietary restrictions, theme, special instructions..."></textarea>
+      </div>
+    </div>
+
+    <button class="submit-btn" onclick="submitInquiry()">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 013.1 10.17a19.79 19.79 0 01-3.07-8.67A2 2 0 012.22 1.5h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L6.09 9.91a16 16 0 006 6l1.77-1.77a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 16.92z"/></svg>
+      Send Inquiry
+    </button>
+
+    <div style="height:24px"></div>
+  </main>
+
+  <!-- ══ CHAT PAGE ════════════════════════════ -->
+  <main class="page chat-page" id="page-chat">
+    <div class="chat-header">
+      <div class="chat-avatar">🍴</div>
+      <div class="chat-header-info">
+        <div class="chat-header-name">Appetina AI Assistant</div>
+        <div class="chat-status">
+          <div class="status-dot"></div>
+          Always online · Replies instantly
+        </div>
+      </div>
+    </div>
+
+    <div class="chat-messages" id="chatMessages">
+      <!-- Messages populated by JS -->
+    </div>
+
+    <div class="chat-input-area">
+      <textarea 
+        class="chat-input" 
+        id="chatInput" 
+        placeholder="Ask about our menu, pricing, availability..."
+        rows="1"
+        onkeydown="handleChatKey(event)"
+        oninput="autoResize(this)">
+      </textarea>
+      <button class="chat-send" onclick="sendChat()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="22" y1="2" x2="11" y2="13"/>
+          <polygon points="22 2 15 22 11 13 2 9 22 2"/>
+        </svg>
+      </button>
+    </div>
+  </main>
+
+  <!-- ══ PROFILE PAGE ═════════════════════════ -->
+  <main class="page" id="page-profile">
+    <div class="profile-header">
+      <div class="profile-avatar">👤</div>
+      <div class="profile-name" id="profileName">Guest User</div>
+      <div class="profile-email" id="profileEmail">Sign in to manage your bookings</div>
+    </div>
+
+    <div class="profile-stats">
+      <div class="stat-item">
+        <div class="stat-num" id="statOrders">0</div>
+        <div class="stat-label">Inquiries</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-num">4.9★</div>
+        <div class="stat-label">Our Rating</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-num">8+</div>
+        <div class="stat-label">Yrs. Active</div>
+      </div>
+    </div>
+
+    <div class="settings-list">
+      <div class="settings-section-label">My Account</div>
+
+      <div class="settings-item" onclick="showToast('📋 Your inquiry history coming soon!')">
+        <div class="settings-item-icon">📋</div>
+        <div class="settings-item-text">
+          <div class="settings-item-title">My Inquiries</div>
+          <div class="settings-item-sub">Track your bookings</div>
+        </div>
+        <div class="settings-item-arrow">›</div>
+      </div>
+
+      <div class="settings-item" onclick="showToast('🔔 Notifications configured!')">
+        <div class="settings-item-icon">🔔</div>
+        <div class="settings-item-text">
+          <div class="settings-item-title">Notifications</div>
+          <div class="settings-item-sub">Updates & confirmations</div>
+        </div>
+        <div class="settings-item-arrow">›</div>
+      </div>
+
+      <div class="settings-section-label">About Appetina</div>
+
+      <div class="settings-item" onclick="showToast('📍 NEXARCH Building, Iligan City, Philippines')">
+        <div class="settings-item-icon">📍</div>
+        <div class="settings-item-text">
+          <div class="settings-item-title">Our Location</div>
+          <div class="settings-item-sub">Iligan City, Lanao del Norte</div>
+        </div>
+        <div class="settings-item-arrow">›</div>
+      </div>
+
+      <div class="settings-item" onclick="showToast('📞 Calling Appetina...')">
+        <div class="settings-item-icon">📞</div>
+        <div class="settings-item-text">
+          <div class="settings-item-title">Call Us</div>
+          <div class="settings-item-sub">Available Mon–Sat, 8AM–6PM</div>
+        </div>
+        <div class="settings-item-arrow">›</div>
+      </div>
+
+      <div class="settings-item" onclick="showToast('📊 Powered by Google Sheets database')">
+        <div class="settings-item-icon">📊</div>
+        <div class="settings-item-text">
+          <div class="settings-item-title">Google Sheets DB</div>
+          <div class="settings-item-sub">Configure your spreadsheet</div>
+        </div>
+        <div class="settings-item-arrow">›</div>
+      </div>
+
+      <div class="settings-section-label">Configuration</div>
+
+      <div class="settings-item" onclick="openConfig()">
+        <div class="settings-item-icon">⚙️</div>
+        <div class="settings-item-text">
+          <div class="settings-item-title">App Settings</div>
+          <div class="settings-item-sub">API keys & Google Sheets URL</div>
+        </div>
+        <div class="settings-item-arrow">›</div>
+      </div>
+
+    </div>
+    <div style="height:24px"></div>
+  </main>
+
+  <!-- ══ PACKAGES PAGE ════════════════════════ -->
+  <main class="page" id="page-packages">
+    <div class="pkg-header">
+      <div class="pkg-header-title">Catering Packages</div>
+      <div class="pkg-header-sub">All-in pricing for every occasion</div>
+    </div>
+
+    <!-- Filter tabs -->
+    <div class="pkg-filter" id="pkgFilter">
+      <button class="pkg-filter-pill active" onclick="filterPkg(this,'all')">🍽️ All</button>
+      <button class="pkg-filter-pill" onclick="filterPkg(this,'wedding')">💍 Wedding</button>
+      <button class="pkg-filter-pill" onclick="filterPkg(this,'debut')">🌸 Debut</button>
+      <button class="pkg-filter-pill" onclick="filterPkg(this,'corporate')">🏢 Corporate</button>
+      <button class="pkg-filter-pill" onclick="filterPkg(this,'birthday')">🎂 Birthday</button>
+      <button class="pkg-filter-pill" onclick="filterPkg(this,'outdoor')">🌿 Outdoor</button>
+    </div>
+
+    <!-- Packages list rendered by JS -->
+    <div class="pkg-list" id="pkgList"></div>
+
+    <!-- Comparison table -->
+    <div class="pkg-compare" id="pkgCompare">
+      <div class="pkg-compare-title">📊 Package Comparison</div>
+      <div class="compare-row header">
+        <div class="compare-cell">Feature</div>
+        <div class="compare-cell">Starter</div>
+        <div class="compare-cell">Classic</div>
+        <div class="compare-cell">Grand</div>
+      </div>
+      <div class="compare-row">
+        <div class="compare-cell">Service Staff</div>
+        <div class="compare-cell">4 pax</div>
+        <div class="compare-cell">6 pax</div>
+        <div class="compare-cell">10 pax</div>
+      </div>
+      <div class="compare-row">
+        <div class="compare-cell">No. of Dishes</div>
+        <div class="compare-cell">4</div>
+        <div class="compare-cell">7</div>
+        <div class="compare-cell">11</div>
+      </div>
+      <div class="compare-row">
+        <div class="compare-cell">Dessert Station</div>
+        <div class="compare-cell"><span class="compare-cross">✕</span></div>
+        <div class="compare-cell"><span class="compare-check">✓</span></div>
+        <div class="compare-cell"><span class="compare-check">✓</span></div>
+      </div>
+      <div class="compare-row">
+        <div class="compare-cell">Free Delivery</div>
+        <div class="compare-cell"><span class="compare-check">✓</span></div>
+        <div class="compare-cell"><span class="compare-check">✓</span></div>
+        <div class="compare-cell"><span class="compare-check">✓</span></div>
+      </div>
+      <div class="compare-row">
+        <div class="compare-cell">Lechon Included</div>
+        <div class="compare-cell"><span class="compare-cross">✕</span></div>
+        <div class="compare-cell"><span class="compare-cross">✕</span></div>
+        <div class="compare-cell"><span class="compare-check">✓</span></div>
+      </div>
+      <div class="compare-row">
+        <div class="compare-cell">Event Coordinator</div>
+        <div class="compare-cell"><span class="compare-cross">✕</span></div>
+        <div class="compare-cell"><span class="compare-check">✓</span></div>
+        <div class="compare-cell"><span class="compare-check">✓</span></div>
+      </div>
+      <div class="compare-row">
+        <div class="compare-cell">Chafing Dishes</div>
+        <div class="compare-cell"><span class="compare-check">✓</span></div>
+        <div class="compare-cell"><span class="compare-check">✓</span></div>
+        <div class="compare-cell"><span class="compare-check">✓</span></div>
+      </div>
+      <div class="compare-row">
+        <div class="compare-cell">Tarpaulin Setup</div>
+        <div class="compare-cell"><span class="compare-cross">✕</span></div>
+        <div class="compare-cell"><span class="compare-check">✓</span></div>
+        <div class="compare-cell"><span class="compare-check">✓</span></div>
+      </div>
+    </div>
+
+    <!-- Add-ons -->
+    <div class="pkg-addons" id="pkgAddons">
+      <div class="pkg-addons-title">🛒 Optional Add-ons</div>
+      <div class="addon-item" onclick="addAddon('Extra Lechon Baboy','4800')">
+        <div class="addon-emoji">🐷</div>
+        <div class="addon-info">
+          <div class="addon-name">Extra Lechon Baboy</div>
+          <div class="addon-desc">Additional whole roasted pig</div>
+        </div>
+        <div class="addon-price">+₱4,800</div>
+      </div>
+      <div class="addon-item" onclick="addAddon('Pasta Station','2500')">
+        <div class="addon-emoji">🍝</div>
+        <div class="addon-info">
+          <div class="addon-name">Pasta Station</div>
+          <div class="addon-desc">Live pasta cooking, 50 pax</div>
+        </div>
+        <div class="addon-price">+₱2,500</div>
+      </div>
+      <div class="addon-item" onclick="addAddon('Dessert Table','3500')">
+        <div class="addon-emoji">🍮</div>
+        <div class="addon-info">
+          <div class="addon-name">Dessert Table</div>
+          <div class="addon-desc">Leche flan, buko pandan & more</div>
+        </div>
+        <div class="addon-price">+₱3,500</div>
+      </div>
+      <div class="addon-item" onclick="addAddon('Drinks Station','1800')">
+        <div class="addon-emoji">🍹</div>
+        <div class="addon-info">
+          <div class="addon-name">Drinks Station</div>
+          <div class="addon-desc">Pandan lemonade & gulaman, 50 pax</div>
+        </div>
+        <div class="addon-price">+₱1,800</div>
+      </div>
+      <div class="addon-item" onclick="addAddon('Extra Service Staff (2 pax)','1200')">
+        <div class="addon-emoji">👨‍🍳</div>
+        <div class="addon-info">
+          <div class="addon-name">Extra Service Staff</div>
+          <div class="addon-desc">2 additional trained waitstaff</div>
+        </div>
+        <div class="addon-price">+₱1,200</div>
+      </div>
+      <div class="addon-item" onclick="addAddon('Tarpaulin & Signage','800')">
+        <div class="addon-emoji">🖼️</div>
+        <div class="addon-info">
+          <div class="addon-name">Tarpaulin & Signage</div>
+          <div class="addon-desc">Custom event banner, 4x8 ft</div>
+        </div>
+        <div class="addon-price">+₱800</div>
+      </div>
+    </div>
+
+    <div style="height:16px"></div>
+  </main>
+
+  <!-- ══ BOTTOM NAV ════════════════════════════ -->
+  <nav class="bottomnav">
+    <button class="nav-tab active" id="tab-home" onclick="showPage('home')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+      <span>Home</span>
+    </button>
+    <button class="nav-tab" id="tab-menu" onclick="showPage('menu')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 2h2l3.5 9H18l3-7H7.5"/><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/></svg>
+      <span>Menu</span>
+    </button>
+    <button class="nav-tab" id="tab-packages" onclick="showPage('packages')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/><path d="M7 8h.01M11 8h6M7 12h.01M11 12h6"/></svg>
+      <span>Packages</span>
+    </button>
+    <button class="nav-tab" id="tab-order" onclick="showPage('order')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+      <span>Book</span>
+    </button>
+    <button class="nav-tab" id="tab-chat" onclick="showPage('chat')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
+      <span>AI Chat</span>
+    </button>
+  </nav>
+
+</div>
+
+<!-- ══ TOAST ═══════════════════════════════════ -->
+<div class="toast" id="toast"></div>
+
+<!-- ══ SUCCESS MODAL ════════════════════════════ -->
+<div class="success-modal" id="successModal">
+  <div class="success-card">
+    <div class="success-icon">🎉</div>
+    <div class="success-title">Inquiry Sent!</div>
+    <div class="success-msg">Thank you! Our team will contact you within 2 hours to confirm your booking.</div>
+    <div class="success-ref">Reference #: <strong id="refNum"></strong></div>
+    <button class="btn-primary" style="width:100%;justify-content:center" onclick="closeSuccess()">
+      Done
+    </button>
+  </div>
+</div>
+
+<script>
+// ═══════════════════════════════════════════════════════════════
+//  CONFIGURATION — Edit your Google Apps Script URL & API key
+// ═══════════════════════════════════════════════════════════════
+const CONFIG = {
+  // Paste your deployed Google Apps Script Web App URL here:
+  GOOGLE_SHEETS_URL: localStorage.getItem('gsheet_url') || '',
+  // Your Anthropic API key (for chatbot):
+  ANTHROPIC_API_KEY: localStorage.getItem('anthropic_key') || '',
+};
+
+// ═══════════════════════════════════════════════════════════════
+//  MENU DATA
+// ═══════════════════════════════════════════════════════════════
+const MENU = [
+  { id:1,  cat:'Mains',      name:'Lechon Baboy',      price:4800, unit:'whole', emoji:'🐷', desc:'Whole roasted pig, crispy skin, tender meat. Iligan\'s finest.',         bg:'bg-1' },
+  { id:2,  cat:'Mains',      name:'Kare-Kare',         price:320,  unit:'pax',   emoji:'🥜', desc:'Oxtail & tripe in rich peanut sauce with bagoong.',                     bg:'bg-2' },
+  { id:3,  cat:'Mains',      name:'Crispy Pata',       price:380,  unit:'order', emoji:'🍖', desc:'Deep-fried pork knuckle, golden and impossibly crispy.',                bg:'bg-5' },
+  { id:4,  cat:'Mains',      name:'Beef Caldereta',    price:280,  unit:'pax',   emoji:'🥩', desc:'Slow-braised beef in tomato sauce with olives and peppers.',            bg:'bg-1' },
+  { id:5,  cat:'Seafood',    name:'Sinigang na Hipon', price:250,  unit:'pax',   emoji:'🦐', desc:'Sour tamarind broth with fresh prawns and vegetables.',                 bg:'bg-3' },
+  { id:6,  cat:'Seafood',    name:'Grilled Tuna',      price:300,  unit:'kg',    emoji:'🐟', desc:'Fresh yellowfin tuna, marinated and charcoal-grilled.',                 bg:'bg-3' },
+  { id:7,  cat:'Rice',       name:'Arroz Valenciana',  price:180,  unit:'pax',   emoji:'🍚', desc:'Filipino-style paella with malagkit rice, chicken & chorizo.',          bg:'bg-6' },
+  { id:8,  cat:'Rice',       name:'Fried Rice Fiesta', price:120,  unit:'pax',   emoji:'🍳', desc:'Garlic fried rice with egg, shrimp bits, and vegetables.',              bg:'bg-6' },
+  { id:9,  cat:'Veggies',    name:'Pinakbet',          price:160,  unit:'pax',   emoji:'🥬', desc:'Ilocano veggie medley with shrimp paste. Nutritious & delicious.',      bg:'bg-3' },
+  { id:10, cat:'Veggies',    name:'Lumpiang Shanghai', price:180,  unit:'dozen', emoji:'🥢', desc:'Crispy spring rolls stuffed with seasoned ground pork.',                bg:'bg-5' },
+  { id:11, cat:'Pasta',      name:'Palabok Fiesta',    price:200,  unit:'pax',   emoji:'🍜', desc:'Rice noodles in shrimp gravy topped with chicharron & eggs.',           bg:'bg-2' },
+  { id:12, cat:'Pasta',      name:'Baked Macaroni',    price:180,  unit:'pax',   emoji:'🧀', desc:'Creamy baked pasta with ground beef and béchamel sauce.',              bg:'bg-4' },
+  { id:13, cat:'Desserts',   name:'Buko Pandan Salad', price:80,   unit:'pax',   emoji:'🥥', desc:'Refreshing young coconut strips in creamy pandan gelatin.',             bg:'bg-3' },
+  { id:14, cat:'Desserts',   name:'Leche Flan',        price:90,   unit:'pax',   emoji:'🍮', desc:'Silky smooth egg custard with rich caramel, steamed to perfection.',    bg:'bg-6' },
+  { id:15, cat:'Drinks',     name:'Pandan Lemonade',   price:60,   unit:'glass', emoji:'🍹', desc:'House-made pandan-infused lemonade, sweetened with muscovado.',         bg:'bg-3' },
+  { id:16, cat:'Drinks',     name:'Gulaman Float',     price:55,   unit:'glass', emoji:'🧋', desc:'Refreshing sago & gulaman in brown sugar syrup with ice cream.',        bg:'bg-4' },
+];
+
+const CATEGORIES = ['All', ...new Set(MENU.map(m => m.cat))];
+
+// ═══════════════════════════════════════════════════════════════
+//  PACKAGES DATA
+// ═══════════════════════════════════════════════════════════════
+const PACKAGES = [
+  {
+    id: 'starter',
+    tier: '✨ Starter',
+    name: 'Fiesta Starter',
+    tagline: 'Perfect for intimate gatherings',
+    pax: '30–50 pax',
+    price: 12500,
+    priceHigh: 18000,
+    perPax: 250,
+    badge: null,
+    featured: false,
+    events: ['all','birthday','outdoor'],
+    inclusions: [
+      { text: '4 Main dishes' },
+      { text: 'Steamed rice (unlimited)' },
+      { text: '1 Dessert' },
+      { text: 'Softdrinks (1 case)' },
+      { text: '4 Service staff' },
+      { text: 'Chafing dishes & setup' },
+      { text: 'Free delivery (Iligan)' },
+      { text: 'Utensils & napkins' },
+    ],
+    dishes: ['🥩 Beef Caldereta', '🍖 Crispy Pata', '🍚 Garlic Rice', '🥥 Buko Pandan'],
+  },
+  {
+    id: 'classic',
+    tier: '⭐ Classic',
+    name: 'Kasalan Classic',
+    tagline: 'Most popular for mid-sized events',
+    pax: '50–100 pax',
+    price: 28000,
+    priceHigh: 45000,
+    perPax: 320,
+    badge: 'Best Value',
+    featured: true,
+    events: ['all','wedding','debut','birthday','corporate'],
+    inclusions: [
+      { text: '7 Main dishes' },
+      { text: 'Steamed & fried rice' },
+      { text: '2 Desserts' },
+      { text: 'Juice & softdrinks' },
+      { text: '6 Service staff' },
+      { text: 'Chafing dishes & setup' },
+      { text: 'Free delivery (Iligan)' },
+      { text: 'Event coordinator' },
+      { text: 'Tarpaulin (4x8 ft)', full: true },
+      { text: 'Utensils, plates & napkins', full: true },
+    ],
+    dishes: ['🐷 Lechon Manok', '🥜 Kare-Kare', '🦐 Sinigang sa Hipon', '🍜 Palabok', '🥩 Caldereta', '🍚 Arroz Valenciana', '🍮 Leche Flan'],
+  },
+  {
+    id: 'grand',
+    tier: '👑 Grand',
+    name: 'Handaan Grande',
+    tagline: 'Full luxury for milestone events',
+    pax: '100–200 pax',
+    price: 55000,
+    priceHigh: 90000,
+    perPax: 380,
+    badge: 'Most Complete',
+    featured: false,
+    events: ['all','wedding','debut','corporate'],
+    inclusions: [
+      { text: '11 Main dishes' },
+      { text: 'Steamed, fried & Valenciana rice' },
+      { text: 'Full dessert station' },
+      { text: 'Drinks station (juice & gulaman)' },
+      { text: '10 Service staff' },
+      { text: 'Chafing dishes & décor setup' },
+      { text: 'Free delivery (Iligan & CDO)' },
+      { text: 'Dedicated event coordinator' },
+      { text: 'Whole Lechon Baboy included', full: true },
+      { text: 'Tarpaulin + table skirting', full: true },
+      { text: 'Utensils, plates, glassware', full: true },
+    ],
+    dishes: ['🐷 Lechon Baboy (whole)', '🥜 Kare-Kare', '🦐 Sinigang na Hipon', '🐟 Grilled Tuna', '🍖 Crispy Pata', '🥩 Caldereta', '🍜 Palabok Fiesta', '🧀 Baked Macaroni', '🍚 Arroz Valenciana', '🍮 Leche Flan', '🥥 Buko Pandan'],
+  },
+  {
+    id: 'lechon',
+    tier: '🔥 Specialty',
+    name: 'Lechon Special',
+    tagline: 'The star of every Filipino celebration',
+    pax: '30–40 pax',
+    price: 4800,
+    priceHigh: null,
+    perPax: null,
+    badge: 'New',
+    featured: false,
+    events: ['all','birthday','outdoor','wedding'],
+    inclusions: [
+      { text: '1 Whole Lechon Baboy' },
+      { text: 'Sarsa (liver sauce)' },
+      { text: 'Chopping & serving included' },
+      { text: 'Free delivery (Iligan)' },
+      { text: 'Serving tray & utensils' },
+      { text: 'Ready in 6–8 hours' },
+    ],
+    dishes: ['🐷 Whole Lechon Baboy', '🥫 Liver Sarsa', '🧄 Garlic & spices marinade'],
+  },
+  {
+    id: 'corporate',
+    tier: '🏢 Corporate',
+    name: 'Exec Business Lunch',
+    tagline: 'Professional setup for corporate events',
+    pax: '20–80 pax',
+    price: 15000,
+    priceHigh: 40000,
+    perPax: 450,
+    badge: null,
+    featured: false,
+    events: ['all','corporate'],
+    inclusions: [
+      { text: '5 Main dishes' },
+      { text: 'Steamed rice & rolls' },
+      { text: '1 Soup' },
+      { text: 'Iced tea & water' },
+      { text: '4 Uniformed service staff' },
+      { text: 'Chafing dishes & setup' },
+      { text: 'Table linen & skirting' },
+      { text: 'Free delivery (Iligan)' },
+      { text: 'Individual plated option available', full: true },
+    ],
+    dishes: ['🥩 Beef Caldereta', '🦐 Sinigang', '🍖 Crispy Pata', '🥬 Pinakbet', '🍚 Steamed Rice'],
+  },
+  {
+    id: 'outdoor',
+    tier: '🌿 Outdoor',
+    name: 'Outdoor Fiesta',
+    tagline: 'Built for open-air & venue catering',
+    pax: '50–150 pax',
+    price: 22000,
+    priceHigh: 55000,
+    perPax: 300,
+    badge: null,
+    featured: false,
+    events: ['all','outdoor','birthday'],
+    inclusions: [
+      { text: '6 Main dishes' },
+      { text: 'Rice (steamed & fried)' },
+      { text: '2 Desserts' },
+      { text: 'Drinks station' },
+      { text: '6 Service staff' },
+      { text: 'Heavy-duty outdoor setup' },
+      { text: 'Generator backup (optional)' },
+      { text: 'Free delivery (within 30 km)' },
+      { text: 'Garbage disposal included', full: true },
+    ],
+    dishes: ['🐷 Lechon Manok', '🥩 Caldereta', '🍖 Crispy Pata', '🦐 Sinigang', '🍚 Garlic Rice', '🥥 Buko Pandan'],
+  },
+];
+
+let currentPkgFilter = 'all';
+
+// ═══════════════════════════════════════════════════════════════
+//  RENDER PACKAGES
+// ═══════════════════════════════════════════════════════════════
+function renderPackages() {
+  const list = document.getElementById('pkgList');
+  const filtered = currentPkgFilter === 'all'
+    ? PACKAGES
+    : PACKAGES.filter(p => p.events.includes(currentPkgFilter));
+
+  list.innerHTML = filtered.map(pkg => `
+    <div class="pkg-card ${pkg.featured ? 'featured' : ''}" id="pkg-${pkg.id}">
+      ${pkg.badge ? `<div class="pkg-badge ${pkg.badge === 'New' ? 'new' : 'best'}">${pkg.badge}</div>` : ''}
+
+      <div class="pkg-card-header">
+        <div class="pkg-tier">${pkg.tier}</div>
+        <div class="pkg-name">${pkg.name}</div>
+        <div class="pkg-pax">👥 ${pkg.pax} &nbsp;·&nbsp; ${pkg.tagline}</div>
+        <div class="pkg-price-row">
+          <div>
+            <div class="pkg-price">₱${pkg.price.toLocaleString()}</div>
+            <div class="pkg-price-note">${pkg.priceHigh ? `up to ₱${pkg.priceHigh.toLocaleString()}` : 'flat rate'}</div>
+          </div>
+          ${pkg.perPax ? `<div class="pkg-price-per">
+            <div class="pkg-price-pax">₱${pkg.perPax}<small>/pax</small></div>
+            <div style="font-size:10px;color:var(--text-light)">avg per guest</div>
+          </div>` : ''}
+        </div>
+      </div>
+
+      <div class="pkg-divider"></div>
+
+      <div class="pkg-inclusions">
+        <div class="pkg-inc-title">✅ What's Included</div>
+        <div class="pkg-inc-grid">
+          ${pkg.inclusions.map(inc => `
+            <div class="pkg-inc-item ${inc.full ? 'full-width' : ''}">
+              <span class="check">✦</span>
+              <span>${inc.text}</span>
+            </div>`).join('')}
+        </div>
+      </div>
+
+      <div class="pkg-divider"></div>
+
+      <div class="pkg-dishes">
+        <div class="pkg-dishes-title">🍽️ Sample Dishes</div>
+        <div class="pkg-dish-chips">
+          ${pkg.dishes.map(d => `<div class="pkg-dish-chip">${d}</div>`).join('')}
+        </div>
+      </div>
+
+      <div class="pkg-cta">
+        <button class="pkg-book-btn ${pkg.featured ? 'gold' : ''}" onclick="bookPackage('${pkg.id}')">
+          📅 Book This Package
+        </button>
+        <button class="pkg-chat-btn" onclick="chatAboutPackage('${pkg.name}')">
+          💬 Ask AI
+        </button>
+      </div>
+    </div>
+  `).join('');
+}
+
+function filterPkg(el, filter) {
+  document.querySelectorAll('.pkg-filter-pill').forEach(p => p.classList.remove('active'));
+  el.classList.add('active');
+  currentPkgFilter = filter;
+  renderPackages();
+}
+
+function bookPackage(pkgId) {
+  const pkg = PACKAGES.find(p => p.id === pkgId);
+  if (!pkg) return;
+  // Pre-fill event type field and switch to order page
+  showPage('order');
+  const typeSelect = document.getElementById('eventType');
+  // Map package to closest event type
+  const typeMap = {
+    wedding: 'Wedding Reception',
+    debut: 'Debut',
+    corporate: 'Corporate Event',
+    lechon: 'Birthday Party',
+    outdoor: 'Outdoor Catering',
+    starter: 'Birthday Party',
+    classic: 'Wedding Reception',
+    grand: 'Wedding Reception',
+  };
+  if (typeSelect) typeSelect.value = typeMap[pkgId] || '';
+  // Pre-fill notes with package name
+  const notes = document.getElementById('notes');
+  if (notes) notes.value = `Package inquiry: ${pkg.name} (${pkg.pax}) — starts at ₱${pkg.price.toLocaleString()}`;
+  showToast(`📋 ${pkg.name} loaded into booking form!`);
+}
+
+function chatAboutPackage(pkgName) {
+  showPage('chat');
+  if (chatHistory.length === 0) initChat();
+  setTimeout(() => {
+    document.getElementById('chatInput').value = `Tell me more about the ${pkgName} package`;
+    sendChat();
+  }, 400);
+}
+
+function addAddon(name, price) {
+  showToast(`➕ ${name} noted in your inquiry!`);
+  const notes = document.getElementById('notes');
+  if (notes) {
+    const current = notes.value;
+    const addon = `Add-on: ${name} (+₱${parseInt(price).toLocaleString()})`;
+    notes.value = current ? current + '\n' + addon : addon;
+  }
+  showPage('order');
+}
+
+
+let cart = {};        // { itemId: quantity }
+let orderCount = parseInt(localStorage.getItem('orderCount') || '0');
+let chatHistory = [];
+let currentCat = 'All';
+let currentPage = 'home';
+
+// ═══════════════════════════════════════════════════════════════
+//  NAVIGATION
+// ═══════════════════════════════════════════════════════════════
+function showPage(name) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+
+  document.getElementById('page-' + name).classList.add('active');
+  const tab = document.getElementById('tab-' + name);
+  if (tab) tab.classList.add('active');
+
+  currentPage = name;
+  window.scrollTo(0, 0);
+
+  if (name === 'menu') renderMenuGrid();
+  if (name === 'chat' && chatHistory.length === 0) initChat();
+  if (name === 'order') renderCartSummary();
+}
+
+function goToOrder() { showPage('order'); }
+
+function selectEvent(el, type) {
+  document.querySelectorAll('.event-chip').forEach(c => c.classList.remove('active'));
+  el.classList.add('active');
+  showToast('📅 ' + type + ' selected! Book now.');
+}
+
+// ═══════════════════════════════════════════════════════════════
+//  RENDER HOME FEATURED
+// ═══════════════════════════════════════════════════════════════
+function renderFeatured() {
+  const featured = [1, 2, 3, 5, 7, 13]; // IDs
+  const container = document.getElementById('featuredMenu');
+  container.innerHTML = '';
+
+  featured.forEach(id => {
+    const item = MENU.find(m => m.id === id);
+    if (!item) return;
+    const qty = cart[item.id] || 0;
+
+    container.innerHTML += `
+      <div class="menu-card" onclick="quickAdd(${item.id})">
+        <div class="menu-card-img ${item.bg}">${item.emoji}</div>
+        <div class="menu-card-body">
+          <div class="menu-card-name">${item.name}</div>
+          <div class="menu-card-desc">${item.desc}</div>
+          <div class="menu-card-footer">
+            <div class="menu-price">₱${item.price.toLocaleString()} <small>/${item.unit}</small></div>
+            <button class="add-btn" onclick="event.stopPropagation(); quickAdd(${item.id})">+</button>
+          </div>
+        </div>
+      </div>`;
+  });
+}
+
+// ═══════════════════════════════════════════════════════════════
+//  RENDER MENU GRID
+// ═══════════════════════════════════════════════════════════════
+function renderMenuCats() {
+  const container = document.getElementById('menuCats');
+  container.innerHTML = CATEGORIES.map(c =>
+    `<button class="cat-pill ${c === currentCat ? 'active' : ''}" onclick="filterCat('${c}')">${c}</button>`
+  ).join('');
+}
+
+function filterCat(cat) {
+  currentCat = cat;
+  renderMenuCats();
+  renderMenuGrid();
+}
+
+function renderMenuGrid() {
+  renderMenuCats();
+  const items = currentCat === 'All' ? MENU : MENU.filter(m => m.cat === currentCat);
+  const container = document.getElementById('menuGrid');
+  container.innerHTML = '';
+
+  items.forEach(item => {
+    const qty = cart[item.id] || 0;
+    container.innerHTML += `
+      <div class="menu-grid-card">
+        <div class="mgc-img ${item.bg}">${item.emoji}</div>
+        <div class="mgc-body">
+          <div class="mgc-category">${item.cat}</div>
+          <div class="mgc-name">${item.name}</div>
+          <div class="mgc-desc">${item.desc}</div>
+          <div class="mgc-footer">
+            <div class="mgc-price">₱${item.price.toLocaleString()}<br><span style="font-size:10px;font-weight:400;color:var(--text-light)">/${item.unit}</span></div>
+            <button class="add-btn" onclick="quickAdd(${item.id})" style="width:32px;height:32px;font-size:20px">+</button>
+          </div>
+        </div>
+      </div>`;
+  });
+}
+
+// ═══════════════════════════════════════════════════════════════
+//  CART MANAGEMENT
+// ═══════════════════════════════════════════════════════════════
+function quickAdd(id) {
+  cart[id] = (cart[id] || 0) + 1;
+  updateCartCount();
+  showToast('✅ Added to your inquiry!');
+  renderFeatured();
+  if (currentPage === 'menu') renderMenuGrid();
+  if (currentPage === 'order') renderCartSummary();
+}
+
+function updateCartCount() {
+  const total = Object.values(cart).reduce((a, b) => a + b, 0);
+  const badge = document.getElementById('cartCount');
+  badge.textContent = total;
+  badge.classList.toggle('visible', total > 0);
+}
+
+function renderCartSummary() {
+  const container = document.getElementById('cartItems');
+  const totalEl = document.getElementById('cartTotal');
+  const totalAmt = document.getElementById('cartTotalAmt');
+
+  const cartEntries = Object.entries(cart).filter(([id, qty]) => qty > 0);
+
+  if (cartEntries.length === 0) {
+    container.innerHTML = `<div class="empty-cart"><div class="emoji">🍽️</div><div>No items yet. Browse our menu!</div></div>`;
+    totalEl.style.display = 'none';
+    return;
+  }
+
+  let total = 0;
+  container.innerHTML = cartEntries.map(([id, qty]) => {
+    const item = MENU.find(m => m.id === parseInt(id));
+    if (!item) return '';
+    const subtotal = item.price * qty;
+    total += subtotal;
+    return `
+      <div class="cart-item">
+        <div class="cart-item-emoji">${item.emoji}</div>
+        <div class="cart-item-info">
+          <div class="cart-item-name">${item.name}</div>
+          <div class="cart-item-price">₱${item.price.toLocaleString()} × ${qty} = ₱${subtotal.toLocaleString()}</div>
+        </div>
+        <div class="cart-item-qty">
+          <button class="qty-btn" onclick="changeQty(${id}, -1)">−</button>
+          <div class="qty-num">${qty}</div>
+          <button class="qty-btn" onclick="changeQty(${id}, 1)">+</button>
+        </div>
+      </div>`;
+  }).join('');
+
+  totalAmt.textContent = '₱' + total.toLocaleString();
+  totalEl.style.display = 'flex';
+}
+
+function changeQty(id, delta) {
+  cart[id] = Math.max(0, (cart[id] || 0) + delta);
+  if (cart[id] === 0) delete cart[id];
+  updateCartCount();
+  renderCartSummary();
+}
+
+function clearCart() {
+  cart = {};
+  updateCartCount();
+  renderCartSummary();
+  showToast('🗑️ Cart cleared');
+}
+
+// ═══════════════════════════════════════════════════════════════
+//  SUBMIT INQUIRY → GOOGLE SHEETS
+// ═══════════════════════════════════════════════════════════════
+async function submitInquiry() {
+  const name    = document.getElementById('clientName').value.trim();
+  const phone   = document.getElementById('clientPhone').value.trim();
+  const email   = document.getElementById('clientEmail').value.trim();
+  const type    = document.getElementById('eventType').value;
+  const date    = document.getElementById('eventDate').value;
+  const guests  = document.getElementById('guestCount').value;
+  const venue   = document.getElementById('venue').value.trim();
+  const notes   = document.getElementById('notes').value.trim();
+
+  if (!name || !phone || !type || !date || !guests || !venue) {
+    showToast('⚠️ Please fill in all required fields');
+    return;
+  }
+
+  // Build cart summary string
+  const cartSummary = Object.entries(cart).map(([id, qty]) => {
+    const item = MENU.find(m => m.id === parseInt(id));
+    return item ? `${item.name} x${qty}` : '';
+  }).filter(Boolean).join(', ') || 'General Inquiry';
+
+  const total = Object.entries(cart).reduce((sum, [id, qty]) => {
+    const item = MENU.find(m => m.id === parseInt(id));
+    return sum + (item ? item.price * qty : 0);
+  }, 0);
+
+  const refNum = 'APT-' + Date.now().toString().slice(-6);
+  const timestamp = new Date().toLocaleString('en-PH', { timeZone: 'Asia/Manila' });
+
+  const payload = {
+    action: 'addInquiry',
+    ref: refNum,
+    timestamp,
+    name, phone, email,
+    eventType: type,
+    eventDate: date,
+    guests,
+    venue,
+    items: cartSummary,
+    estimatedTotal: total > 0 ? '₱' + total.toLocaleString() : 'TBD',
+    notes,
+    status: 'New'
+  };
+
+  const btn = document.querySelector('.submit-btn');
+  btn.disabled = true;
+  btn.innerHTML = '⏳ Submitting...';
+
+  try {
+    if (CONFIG.GOOGLE_SHEETS_URL) {
+      await fetch(CONFIG.GOOGLE_SHEETS_URL, {
+        method: 'POST',
+        mode: 'no-cors',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+    } else {
+      // Simulate for demo
+      await new Promise(r => setTimeout(r, 1200));
+    }
+
+    orderCount++;
+    localStorage.setItem('orderCount', orderCount);
+    document.getElementById('statOrders').textContent = orderCount;
+    document.getElementById('refNum').textContent = refNum;
+    document.getElementById('successModal').classList.add('show');
+
+    // Reset form
+    ['clientName','clientPhone','clientEmail','eventType','eventDate','guestCount','venue','notes']
+      .forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
+    cart = {};
+    updateCartCount();
+    renderCartSummary();
+
+  } catch(e) {
+    showToast('❌ Error. Check your connection.');
+  }
+
+  btn.disabled = false;
+  btn.innerHTML = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 013.1 10.17a19.79 19.79 0 01-3.07-8.67A2 2 0 012.22 1.5h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L6.09 9.91a16 16 0 006 6l1.77-1.77a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 16.92z"/></svg> Send Inquiry';
+}
+
+function closeSuccess() {
+  document.getElementById('successModal').classList.remove('show');
+  showPage('home');
+}
+
+// ═══════════════════════════════════════════════════════════════
+//  CHATBOT (Anthropic API)
+// ═══════════════════════════════════════════════════════════════
+const SYSTEM_PROMPT = `You are Kusinera, the friendly AI assistant for Appetina, a premium catering and food services company based in Iligan City, Philippines, specializing in Modern Filipino Cuisine.
+
+ABOUT APPETINA:
+- Services: Weddings, Debuts, Birthday Parties, Corporate Events, Outdoor Catering, Memorial Lunches
+- Location: Iligan City, Lanao del Norte, Philippines
+- Availability: Mon–Sat
+- Response time: Within 2 hours for inquiries
+
+MENU (Prices per pax/unit unless stated):
+MAINS: Lechon Baboy ₱4,800/whole, Kare-Kare ₱320/pax, Crispy Pata ₱380/order, Beef Caldereta ₱280/pax
+SEAFOOD: Sinigang na Hipon ₱250/pax, Grilled Tuna ₱300/kg
+RICE: Arroz Valenciana ₱180/pax, Garlic Fried Rice ₱120/pax
+VEGGIES: Pinakbet ₱160/pax, Lumpiang Shanghai ₱180/dozen
+PASTA: Palabok Fiesta ₱200/pax, Baked Macaroni ₱180/pax
+DESSERTS: Buko Pandan Salad ₱80/pax, Leche Flan ₱90/pax
+DRINKS: Pandan Lemonade ₱60/glass, Gulaman Float ₱55/glass
+
+PACKAGES (approximate):
+- Mini Package (30–50 pax): ₱8,500–₱15,000 (5 dishes + rice + drinks + service)
+- Standard (50–100 pax): ₱18,000–₱35,000
+- Premium (100–200 pax): ₱40,000–₱80,000
+- Lechon Special: ₱4,800/whole pig (good for 30–40 pax)
+
+Be warm, helpful, and proud of Filipino cuisine. Keep responses concise and mobile-friendly. Use Tagalog/Bisaya greetings occasionally. Help users inquire, choose packages, and book through the app.`;
+
+function initChat() {
+  chatHistory = [];
+  const msgs = document.getElementById('chatMessages');
+  msgs.innerHTML = '';
+
+  addBotMessage("Maayong adlaw! 😊 I'm **Kusinera**, Appetina's AI food assistant. How can I help you today?", [
+    "What events do you cater?",
+    "Show me your packages",
+    "How do I book?",
+    "What's your Lechon price?"
+  ]);
+}
+
+function addBotMessage(text, quickReplies = []) {
+  const msgs = document.getElementById('chatMessages');
+  const time = new Date().toLocaleTimeString('en-PH', { hour: '2-digit', minute: '2-digit' });
+
+  // Convert **bold** to <strong>
+  const html = text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>').replace(/\n/g, '<br>');
+
+  let qrHtml = '';
+  if (quickReplies.length) {
+    qrHtml = `<div class="quick-replies">${quickReplies.map(q =>
+      `<button class="qr-btn" onclick="sendQuick('${q}')">${q}</button>`
+    ).join('')}</div>`;
+  }
+
+  msgs.innerHTML += `
+    <div class="msg bot">
+      <div class="msg-avatar">🍴</div>
+      <div>
+        <div class="msg-bubble">${html}</div>
+        ${qrHtml}
+        <div class="msg-time">${time}</div>
+      </div>
+    </div>`;
+  
+  msgs.scrollTop = msgs.scrollHeight;
+}
+
+function addUserMessage(text) {
+  const msgs = document.getElementById('chatMessages');
+  const time = new Date().toLocaleTimeString('en-PH', { hour: '2-digit', minute: '2-digit' });
+
+  msgs.innerHTML += `
+    <div class="msg user">
+      <div class="msg-avatar" style="background:var(--brown-rich)">👤</div>
+      <div>
+        <div class="msg-bubble">${text}</div>
+        <div class="msg-time">${time}</div>
+      </div>
+    </div>`;
+
+  msgs.scrollTop = msgs.scrollHeight;
+}
+
+function showTyping() {
+  const msgs = document.getElementById('chatMessages');
+  const el = document.createElement('div');
+  el.className = 'msg bot';
+  el.id = 'typingIndicator';
+  el.innerHTML = `
+    <div class="msg-avatar">🍴</div>
+    <div class="typing-indicator">
+      <div class="dot"></div><div class="dot"></div><div class="dot"></div>
+    </div>`;
+  msgs.appendChild(el);
+  msgs.scrollTop = msgs.scrollHeight;
+}
+
+function hideTyping() {
+  const el = document.getElementById('typingIndicator');
+  if (el) el.remove();
+}
+
+async function sendChat() {
+  const input = document.getElementById('chatInput');
+  const text = input.value.trim();
+  if (!text) return;
+
+  input.value = '';
+  input.style.height = 'auto';
+
+  addUserMessage(text);
+  chatHistory.push({ role: 'user', content: text });
+
+  showTyping();
+
+  try {
+    let botReply = '';
+
+    if (CONFIG.ANTHROPIC_API_KEY) {
+      const res = await fetch('https://api.anthropic.com/v1/messages', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-api-key': CONFIG.ANTHROPIC_API_KEY,
+          'anthropic-version': '2023-06-01'
+        },
+        body: JSON.stringify({
+          model: 'claude-sonnet-4-20250514',
+          max_tokens: 400,
+          system: SYSTEM_PROMPT,
+          messages: chatHistory
+        })
+      });
+
+      const data = await res.json();
+      botReply = data.content?.[0]?.text || 'Sorry, I had trouble responding. Please try again!';
+    } else {
+      // Local fallback responses
+      botReply = getLocalReply(text);
+    }
+
+    chatHistory.push({ role: 'assistant', content: botReply });
+    hideTyping();
+    addBotMessage(botReply, getSuggestedReplies(text));
+
+  } catch (e) {
+    hideTyping();
+    const fallback = getLocalReply(text);
+    chatHistory.push({ role: 'assistant', content: fallback });
+    addBotMessage(fallback, getSuggestedReplies(text));
+  }
+}
+
+function getLocalReply(text) {
+  const t = text.toLowerCase();
+  if (t.includes('lechon'))
+    return "🐷 Our **Lechon Baboy** starts at **₱4,800 per whole pig**, good for 30–40 guests. It\'s crispy on the outside, juicy inside — the star of any Filipino celebration!\n\nWant to add it to your booking?";
+  if (t.includes('wedding'))
+    return "💍 We love catering weddings! Our **Wedding Packages** start at ₱18,000 for 50 pax. We handle full setup, service, and of course, the amazing food.\n\nShall I walk you through our wedding menu options?";
+  if (t.includes('package') || t.includes('price'))
+    return "Here are our packages:\n\n🍽️ **Mini** (30–50 pax) — ₱8,500–₱15,000\n🍽️ **Standard** (50–100 pax) — ₱18,000–₱35,000\n🍽️ **Premium** (100–200 pax) — ₱40,000–₱80,000\n\nAll include dishes, rice, drinks & service staff!";
+  if (t.includes('book') || t.includes('inquir') || t.includes('reserve'))
+    return "To book with us:\n\n1️⃣ Go to the **Book** tab\n2️⃣ Browse our menu & add items\n3️⃣ Fill in your event details\n4️⃣ Submit — we reply within **2 hours!**\n\nWould you like help choosing dishes?";
+  if (t.includes('kare'))
+    return "🥜 **Kare-Kare** is one of our best sellers! Slow-simmered oxtail in a rich peanut sauce, served with bagoong. It's **₱320/pax** and pairs beautifully with Lechon!";
+  if (t.includes('location') || t.includes('where') || t.includes('iligan'))
+    return "📍 We're based in **Iligan City, Lanao del Norte**, Philippines. We cater events across Iligan, Cagayan de Oro, and surrounding areas. Free delivery within Iligan!";
+  return "Salamat sa inyong mensahe! 😊 I\'m Kusinera, here to help you plan the perfect event with Appetina\'s Modern Filipino Cuisine. Ask me about our **menu**, **packages**, **pricing**, or how to **book**!";
+}
+
+function getSuggestedReplies(text) {
+  const t = text.toLowerCase();
+  if (t.includes('wedding')) return ["Show wedding menu", "What's included?", "Get a quote"];
+  if (t.includes('package') || t.includes('price')) return ["Book now", "What's included?", "Lechon price?"];
+  return ["Show packages", "How to book?", "Menu prices"];
+}
+
+function sendQuick(text) {
+  document.getElementById('chatInput').value = text;
+  sendChat();
+}
+
+function handleChatKey(e) {
+  if (e.key === 'Enter' && !e.shiftKey) {
+    e.preventDefault();
+    sendChat();
+  }
+}
+
+function autoResize(el) {
+  el.style.height = 'auto';
+  el.style.height = Math.min(el.scrollHeight, 100) + 'px';
+}
+
+// ═══════════════════════════════════════════════════════════════
+//  TOAST
+// ═══════════════════════════════════════════════════════════════
+let toastTimer;
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove('show'), 2800);
+}
+
+// ═══════════════════════════════════════════════════════════════
+//  CONFIG DIALOG
+// ═══════════════════════════════════════════════════════════════
+function openConfig() {
+  const url = prompt('Google Apps Script Web App URL:\n(Leave blank if not yet set)', CONFIG.GOOGLE_SHEETS_URL);
+  if (url !== null) {
+    CONFIG.GOOGLE_SHEETS_URL = url;
+    localStorage.setItem('gsheet_url', url);
+  }
+
+  const key = prompt('Anthropic API Key (for chatbot):\n(Leave blank to use local replies)', CONFIG.ANTHROPIC_API_KEY);
+  if (key !== null) {
+    CONFIG.ANTHROPIC_API_KEY = key;
+    localStorage.setItem('anthropic_key', key);
+  }
+
+  showToast('⚙️ Configuration saved!');
+}
+
+// ═══════════════════════════════════════════════════════════════
+//  INIT
+// ═══════════════════════════════════════════════════════════════
+document.addEventListener('DOMContentLoaded', () => {
+  renderFeatured();
+  document.getElementById('statOrders').textContent = orderCount;
+
+  // Set minimum date for event date input
+  const dateInput = document.getElementById('eventDate');
+  const tomorrow = new Date();
+  tomorrow.setDate(tomorrow.getDate() + 1);
+  dateInput.min = tomorrow.toISOString().split('T')[0];
+
+  // Profile name from storage
+  const savedName = localStorage.getItem('clientName');
+  if (savedName) {
+    document.getElementById('profileName').textContent = savedName;
+  }
+});
+
+// Service Worker registration for PWA/Android install
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('sw.js').catch(() => {});
+}
+</script>
+</body>
+</html>
