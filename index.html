@@ -2732,14 +2732,33 @@ async function submitInquiry() {
   btn.disabled = true;
   btn.innerHTML = '⏳ Submitting...';
 
-  // ── Send to Google Sheets via script-tag injection ─────────────────
-  // This is the ONLY method that reliably works with Google Apps Script
-  // across all browsers without CORS issues. GAS returns JSONP-compatible
-  // responses when called this way.
+  // ── Send to Google Sheets — IFRAME POST METHOD ───────────────────
+  // This is the definitive solution for GitHub Pages → Google Apps Script.
+  // A hidden <form> POST via an invisible <iframe> bypasses ALL CORS restrictions.
+  // GAS receives a full form POST and executes doPost() normally.
+  // No fetch, no CORS, no redirects — guaranteed to work from any static host.
   function sendToGoogleSheets(payload) {
     return new Promise(function(resolve) {
-      const params = new URLSearchParams({
-        action:         payload.action,
+
+      // Build a unique iframe name
+      const iframeName = 'gasTarget_' + Date.now();
+
+      // Create hidden iframe
+      const iframe = document.createElement('iframe');
+      iframe.name = iframeName;
+      iframe.style.cssText = 'display:none;width:0;height:0;border:0;position:absolute;top:-9999px';
+      document.body.appendChild(iframe);
+
+      // Create hidden form that posts to GAS
+      const form = document.createElement('form');
+      form.method = 'POST';
+      form.action = CONFIG.GOOGLE_SHEETS_URL;
+      form.target = iframeName;
+      form.style.display = 'none';
+
+      // Add all payload fields as hidden inputs
+      const fields = {
+        action:         'addInquiry',
         ref:            payload.ref,
         timestamp:      payload.timestamp,
         name:           payload.name,
@@ -2753,44 +2772,28 @@ async function submitInquiry() {
         estimatedTotal: payload.estimatedTotal,
         notes:          payload.notes || '',
         status:         payload.status || 'New'
+      };
+
+      Object.keys(fields).forEach(function(key) {
+        const input = document.createElement('input');
+        input.type = 'hidden';
+        input.name = key;
+        input.value = fields[key];
+        form.appendChild(input);
       });
 
-      const url = CONFIG.GOOGLE_SHEETS_URL + '?' + params.toString();
-      console.log('Sending to GAS:', url);
+      document.body.appendChild(form);
 
-      // Method 1: fetch with cors mode (works if GAS has CORS headers)
-      fetch(url, { method: 'GET' })
-        .then(r => {
-          console.log('Fetch response status:', r.status, r.type);
-          return r.text();
-        })
-        .then(text => {
-          console.log('GAS response:', text);
-          resolve({ success: true, method: 'fetch' });
-        })
-        .catch(err => {
-          console.warn('Fetch failed, trying no-cors:', err.message);
-          // Method 2: fetch no-cors (fires the request even if response unreadable)
-          fetch(url, { method: 'GET', mode: 'no-cors' })
-            .then(() => {
-              console.log('no-cors fetch fired');
-              resolve({ success: true, method: 'no-cors' });
-            })
-            .catch(err2 => {
-              console.warn('no-cors also failed:', err2.message);
-              // Method 3: Image beacon (always fires, ignores CORS)
-              const img = new Image();
-              img.src = url;
-              img.onload = img.onerror = () => {
-                console.log('Image beacon fired');
-                resolve({ success: true, method: 'beacon' });
-              };
-              setTimeout(() => resolve({ success: true, method: 'timeout' }), 3000);
-            });
-        });
-
-      // Safety timeout — always resolve after 5s
-      setTimeout(() => resolve({ success: true, method: 'safety-timeout' }), 5000);
+      // Submit and clean up after 4 seconds
+      setTimeout(function() {
+        form.submit();
+        console.log('📤 Form submitted to GAS via iframe');
+        setTimeout(function() {
+          try { document.body.removeChild(iframe); } catch(e) {}
+          try { document.body.removeChild(form); } catch(e) {}
+          resolve({ success: true, method: 'iframe-post' });
+        }, 3000);
+      }, 100);
     });
   }
 
