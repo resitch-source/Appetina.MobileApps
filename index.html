@@ -1111,36 +1111,13 @@ async function submitBooking() {
   // ── 1. Google Sheets + Email (via Apps Script) ──────────────
   const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzgiIM1LfbujitaT3an4egn1NS9bH5Ll3FmjtiHaohmLNHtl0EV1fuB5W-InqNdUUvI/exec';
   try {
-    // Use a hidden iframe form POST — works around CORS with Google Apps Script
-    const form = document.createElement('form');
-    form.method = 'POST';
-    form.action = SCRIPT_URL;
-    form.target = '_blank_gas_hidden';
-    form.style.display = 'none';
-    const input = document.createElement('input');
-    input.type = 'hidden';
-    input.name = 'payload';
-    input.value = JSON.stringify(data);
-    form.appendChild(input);
-    // Also send as flat fields for easier GAS parsing
-    const inputRaw = document.createElement('input');
-    inputRaw.type = 'hidden';
-    inputRaw.name = 'data';
-    inputRaw.value = JSON.stringify(data);
-    form.appendChild(inputRaw);
-    document.body.appendChild(form);
-    // Open hidden iframe as target
-    let iframe = document.getElementById('_gas_iframe');
-    if (!iframe) {
-      iframe = document.createElement('iframe');
-      iframe.name = '_blank_gas_hidden';
-      iframe.id = '_gas_iframe';
-      iframe.style.display = 'none';
-      document.body.appendChild(iframe);
-    }
-    form.target = '_blank_gas_hidden';
-    form.submit();
-    document.body.removeChild(form);
+    const formData = new FormData();
+    formData.append('data', JSON.stringify(data));
+    await fetch(SCRIPT_URL, {
+      method: 'POST',
+      mode: 'no-cors',
+      body: formData
+    });
   } catch(e) { console.warn('Sheets/Email error:', e); }
 
   // ── 2. Show success screen ───────────────────────────────────
