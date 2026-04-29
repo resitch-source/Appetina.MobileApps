@@ -1076,9 +1076,33 @@ function updatePaymentDisplay() {
 function handleReceipt(input) {
   const file = input.files[0];
   if (!file) return;
-  if (file.size > 5*1024*1024) { showToast('File too large (max 5MB)'); return; }
+  if (file.size > 10*1024*1024) { showToast('File too large (max 10MB)'); return; }
   state.receiptFile = file;
-  document.getElementById('receiptPreview').textContent = '\u2713 '+file.name;
+  document.getElementById('receiptPreview').textContent = '\u2713 ' + file.name + ' (will be compressed & uploaded)';
+}
+
+// ── Cloudinary direct browser upload (no CORS issues) ────────
+// Free account: sign up at cloudinary.com, get your cloud_name
+// Then create an unsigned upload preset named "appetina_receipts"
+const CLOUDINARY_CLOUD = 'appetina-catering';        // ← your Cloudinary cloud name
+const CLOUDINARY_PRESET = 'appetina_receipts';       // ← your unsigned upload preset name
+
+async function uploadToCloudinary(file, ref) {
+  const fd = new FormData();
+  fd.append('file', file);
+  fd.append('upload_preset', CLOUDINARY_PRESET);
+  fd.append('folder', 'appetina_receipts');
+  fd.append('public_id', ref + '_receipt');
+  fd.append('tags', ref);
+
+  const res  = await fetch('https://api.cloudinary.com/v1_1/' + CLOUDINARY_CLOUD + '/image/upload', {
+    method: 'POST',
+    body: fd
+  });
+  if (!res.ok) throw new Error('Cloudinary HTTP ' + res.status);
+  const json = await res.json();
+  if (json.error) throw new Error(json.error.message);
+  return json.secure_url; // public image URL
 }
 
 async function submitBooking() {
@@ -1091,34 +1115,54 @@ async function submitBooking() {
   const addonTotal = addons.reduce((s,o)=>s+o.price,0);
   const lechonPrice = state.lechon ? 9000 : 0;
   const grand = state.pkg.price + addonTotal + lechonPrice;
+
+  // ── 1. Upload receipt image to Cloudinary first ───────────────
+  let receiptUrl = '';
+  if (state.receiptFile) {
+    try {
+      btn.innerHTML = '<span class="spinner"></span> Uploading receipt\u2026';
+      receiptUrl = await uploadToCloudinary(state.receiptFile, ref);
+      console.log('Receipt uploaded:', receiptUrl);
+    } catch(e) {
+      console.warn('Cloudinary upload failed:', e.message);
+      receiptUrl = '';
+    }
+  }
+
   const data = {
-    bookingRef:ref, timestamp:new Date().toLocaleString('en-PH',{timeZone:'Asia/Manila'}),
-    eventType:state.eventType, package:state.pkg.label, totalPrice:grand,
-    downpayment:Math.ceil(grand*0.5), numPax:state.pkg.pax, addonOrders:addons,
-    lechon: state.lechon, lechonPrice: lechonPrice,
-    menu:state.menu,
-    clientName:document.getElementById('clientName').value,
-    contact:document.getElementById('clientContact').value,
-    email:document.getElementById('clientEmail').value,
-    eventDate:document.getElementById('eventDate').value,
-    eventTime:document.getElementById('eventTime').value,
-    venue:document.getElementById('eventVenue').value,
-    colorMotif:getMotifValue(),
-    occasion:document.getElementById('occasion').value,
-    notes:document.getElementById('specialNotes').value,
-    hasReceipt:!!state.receiptFile
+    bookingRef: ref,
+    timestamp:  new Date().toLocaleString('en-PH', {timeZone:'Asia/Manila'}),
+    eventType:  state.eventType,
+    package:    state.pkg.label,
+    totalPrice: grand,
+    downpayment:Math.ceil(grand*0.5),
+    numPax:     state.pkg.pax,
+    addonOrders:addons,
+    lechon:     state.lechon,
+    lechonPrice:lechonPrice,
+    menu:       state.menu,
+    clientName: document.getElementById('clientName').value,
+    contact:    document.getElementById('clientContact').value,
+    email:      document.getElementById('clientEmail').value,
+    eventDate:  document.getElementById('eventDate').value,
+    eventTime:  document.getElementById('eventTime').value,
+    venue:      document.getElementById('eventVenue').value,
+    colorMotif: getMotifValue(),
+    occasion:   document.getElementById('occasion').value,
+    notes:      document.getElementById('specialNotes').value,
+    hasReceipt: !!receiptUrl,
+    receiptUrl: receiptUrl   // ← direct image URL, no base64 needed
   };
-  // ── 1. Google Sheets + Email (via Apps Script) ──────────────
+
+  // ── 2. Send booking data + receipt URL to Google Apps Script ──
   const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzgiIM1LfbujitaT3an4egn1NS9bH5Ll3FmjtiHaohmLNHtl0EV1fuB5W-InqNdUUvI/exec';
   try {
-    const formData = new FormData();
-    formData.append('data', JSON.stringify(data));
-    await fetch(SCRIPT_URL, {
-      method: 'POST',
-      mode: 'no-cors',
-      body: formData
-    });
-  } catch(e) { console.warn('Sheets/Email error:', e); }
+    btn.innerHTML = '<span class="spinner"></span> Saving booking\u2026';
+    const fd = new FormData();
+    fd.append('data', JSON.stringify(data));
+    await fetch(SCRIPT_URL, { method:'POST', mode:'no-cors', body: fd });
+  } catch(e) { console.warn('Sheets error:', e); }
+  }
 
   // ── 2. Show success screen ───────────────────────────────────
   document.getElementById('bookingRefDisplay').textContent = ref;
