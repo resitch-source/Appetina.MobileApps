@@ -137,6 +137,13 @@ body{font-family:'Jost',sans-serif;background:var(--warm-white);color:var(--text
 .upload-text{font-size:0.88rem;color:var(--text-muted);}
 .upload-text strong{color:var(--gold);}
 .receipt-preview{font-size:0.85rem;color:var(--sage);margin-top:0.5rem;font-weight:500;}
+.upload-label{font-size:0.9rem;font-weight:600;color:var(--brown);margin-bottom:0.4rem;}
+.receipt-thumb-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(90px,1fr));gap:0.55rem;margin-bottom:0.75rem;}
+.receipt-thumb-item{position:relative;border-radius:8px;overflow:hidden;border:2px solid var(--border);aspect-ratio:1;background:#f5f0eb;}
+.receipt-thumb-item img{width:100%;height:100%;object-fit:cover;display:block;}
+.receipt-thumb-remove{position:absolute;top:3px;right:3px;background:rgba(198,40,40,0.9);color:#fff;border:none;border-radius:50%;width:20px;height:20px;font-size:0.7rem;cursor:pointer;display:flex;align-items:center;justify-content:center;font-weight:700;line-height:1;padding:0;}
+.receipt-thumb-remove:hover{background:#c62828;}
+.receipt-thumb-name{position:absolute;bottom:0;left:0;right:0;background:rgba(0,0,0,0.55);color:#fff;font-size:0.6rem;padding:2px 4px;text-overflow:ellipsis;white-space:nowrap;overflow:hidden;}
 .success-panel{text-align:center;padding:2rem 1rem;}
 .success-icon{width:80px;height:80px;border-radius:50%;background:linear-gradient(135deg,var(--sage),#5A8A5E);display:flex;align-items:center;justify-content:center;margin:0 auto 1.5rem;font-size:2.2rem;}
 .success-title{font-family:'Cormorant Garamond',serif;font-size:2.2rem;font-weight:400;color:var(--brown);margin-bottom:0.75rem;}
@@ -578,12 +585,18 @@ footer{background:#110D08;padding:2.5rem 1.5rem;text-align:center;}
         <div class="payment-card"><div class="payment-card-title">&#127981; BPI Bank Transfer</div><div class="payment-detail"><strong>Account Name:</strong> Cyril Lacida Sitchon<br/><strong>Account No.:</strong> 9359672591<br/><strong>Branch:</strong> Iligan City</div></div>
         <div class="payment-card"><div class="payment-card-title">&#128181; Cash</div><div class="payment-detail">Arrange in person via GCash or Facebook Messenger. Official receipt issued upon payment.</div></div>
       </div>
-      <div class="upload-box" onclick="document.getElementById('receiptFile').click()">
+      <div class="upload-label">&#128206; Upload Proof of Payment</div>
+      <p style="font-size:0.8rem;color:var(--text-muted);margin-bottom:0.75rem;">You can upload multiple screenshots or photos (PNG, JPG — max 10MB each)</p>
+
+      <!-- Thumbnail grid -->
+      <div class="receipt-thumb-grid" id="receiptThumbGrid"></div>
+
+      <!-- Add more button -->
+      <div class="upload-box" id="uploadAddBtn" onclick="document.getElementById('receiptFile').click()">
         <div class="upload-icon">&#128206;</div>
-        <div class="upload-text"><strong>Upload Proof of Payment</strong><br/>Click to select screenshot or photo<br/><span style="font-size:0.75rem">(PNG, JPG, PDF &mdash; max 5MB)</span></div>
-        <div class="receipt-preview" id="receiptPreview"></div>
+        <div class="upload-text"><strong>Add Receipt Image</strong><br/>Click to select screenshot or photo</div>
       </div>
-      <input type="file" id="receiptFile" accept="image/*,application/pdf" style="display:none" onchange="handleReceipt(this)"/>
+      <input type="file" id="receiptFile" accept="image/*" style="display:none" multiple onchange="handleReceipt(this)"/>
       <div class="btn-row">
         <button class="btn btn-secondary" onclick="goToStep(4)">&larr; Back</button>
         <button class="btn btn-primary" id="submitBtn" onclick="submitBooking()">&#9989; Submit Booking</button>
@@ -1073,12 +1086,44 @@ function updatePaymentDisplay() {
   document.getElementById('totalDisplay').textContent = note;
 }
 
+// ── Multi-receipt image handler ───────────────────────────────
+// state.receiptFiles is now an array
+if (!Array.isArray(state.receiptFiles)) state.receiptFiles = [];
+
 function handleReceipt(input) {
-  const file = input.files[0];
-  if (!file) return;
-  if (file.size > 10*1024*1024) { showToast('File too large (max 10MB)'); return; }
-  state.receiptFile = file;
-  document.getElementById('receiptPreview').textContent = '\u2713 ' + file.name + ' (will be compressed & uploaded)';
+  const files = Array.from(input.files || []);
+  if (!files.length) return;
+  files.forEach(file => {
+    if (file.size > 10 * 1024 * 1024) { showToast('File too large (max 10MB): ' + file.name, 'red'); return; }
+    if (state.receiptFiles.length >= 5) { showToast('Maximum 5 images allowed', 'red'); return; }
+    state.receiptFiles.push(file);
+    addReceiptThumb(file, state.receiptFiles.length - 1);
+  });
+  // Reset input so same file can be re-selected if needed
+  input.value = '';
+}
+
+function addReceiptThumb(file, idx) {
+  const grid = document.getElementById('receiptThumbGrid');
+  const item = document.createElement('div');
+  item.className = 'receipt-thumb-item';
+  item.id = 'rthumb-' + idx;
+  const reader = new FileReader();
+  reader.onload = e => {
+    item.innerHTML =
+      '<img src="' + e.target.result + '" alt="receipt"/>' +
+      '<button class="receipt-thumb-remove" onclick="removeReceiptThumb(' + idx + ')" title="Remove">✕</button>' +
+      '<div class="receipt-thumb-name">' + file.name + '</div>';
+  };
+  reader.readAsDataURL(file);
+  grid.appendChild(item);
+}
+
+function removeReceiptThumb(idx) {
+  state.receiptFiles[idx] = null; // mark as removed (keep indexes stable)
+  const el = document.getElementById('rthumb-' + idx);
+  if (el) el.remove();
+  showToast('Image removed', 'gold');
 }
 
 // ── Cloudinary direct browser upload (no CORS issues) ────────
@@ -1091,23 +1136,18 @@ async function uploadToCloudinary(file, ref) {
   const fd = new FormData();
   fd.append('file', file);
   fd.append('upload_preset', CLOUDINARY_PRESET);
-  // Note: no public_id — preset uses auto-generate which avoids conflicts
-  // The ref is added as a tag so you can find it later
   fd.append('context', 'booking_ref=' + ref);
 
-  showToast('📤 Uploading receipt…', 'gold');
   const res  = await fetch('https://api.cloudinary.com/v1_1/' + CLOUDINARY_CLOUD + '/image/upload', {
     method: 'POST',
     body: fd
   });
   const json = await res.json();
-  console.log('Cloudinary response:', JSON.stringify(json));
   if (!res.ok || json.error) {
     const msg = (json.error && json.error.message) || ('HTTP ' + res.status);
-    showToast('❌ Receipt upload failed: ' + msg, 'red');
+    showToast('❌ Upload failed: ' + msg, 'red');
     throw new Error(msg);
   }
-  showToast('✅ Receipt uploaded!', 'gold');
   return json.secure_url;
 }
 
@@ -1122,18 +1162,22 @@ async function submitBooking() {
   const lechonPrice = state.lechon ? 9000 : 0;
   const grand = state.pkg.price + addonTotal + lechonPrice;
 
-  // ── 1. Upload receipt image to Cloudinary first ───────────────
-  let receiptUrl = '';
-  if (state.receiptFile) {
-    try {
-      btn.innerHTML = '<span class="spinner"></span> Uploading receipt\u2026';
-      receiptUrl = await uploadToCloudinary(state.receiptFile, ref);
-      console.log('✅ Receipt URL:', receiptUrl);
-    } catch(e) {
-      console.error('Cloudinary error:', e.message);
-      receiptUrl = '';
+  // ── 1. Upload all receipt images to Cloudinary ───────────────
+  const activeFiles = (state.receiptFiles || []).filter(f => f !== null);
+  const receiptUrls = [];
+  if (activeFiles.length > 0) {
+    for (let i = 0; i < activeFiles.length; i++) {
+      try {
+        btn.innerHTML = '<span class="spinner"></span> Uploading receipt ' + (i+1) + ' of ' + activeFiles.length + '\u2026';
+        const url = await uploadToCloudinary(activeFiles[i], ref + '_' + (i+1));
+        if (url) receiptUrls.push(url);
+        console.log('✅ Receipt ' + (i+1) + ':', url);
+      } catch(e) {
+        console.error('Cloudinary error for file ' + (i+1) + ':', e.message);
+      }
     }
   }
+  const receiptUrl = receiptUrls[0] || ''; // primary URL for sheet column
 
   const data = {
     bookingRef: ref,
@@ -1156,8 +1200,9 @@ async function submitBooking() {
     colorMotif: getMotifValue(),
     occasion:   document.getElementById('occasion').value,
     notes:      document.getElementById('specialNotes').value,
-    hasReceipt: !!receiptUrl,
-    receiptUrl: receiptUrl   // ← direct image URL, no base64 needed
+    hasReceipt:  receiptUrls.length > 0,
+    receiptUrl:  receiptUrl,           // primary URL for sheet column
+    receiptUrls: receiptUrls           // all URLs for email body
   };
 
   // ── 2. Send booking data + receipt URL to Google Apps Script ──
