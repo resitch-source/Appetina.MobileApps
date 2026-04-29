@@ -1091,15 +1091,17 @@ async function uploadToCloudinary(file, ref) {
   const fd = new FormData();
   fd.append('file', file);
   fd.append('upload_preset', CLOUDINARY_PRESET);
-  fd.append('folder', 'appetina_receipts');
-  fd.append('public_id', ref + '_receipt');
+  // Note: no public_id — preset uses auto-generate which avoids conflicts
+  // The ref is added as a tag so you can find it later
+  fd.append('context', 'booking_ref=' + ref);
 
-  showToast('📤 Uploading receipt to Cloudinary…', 'gold');
-  const res = await fetch('https://api.cloudinary.com/v1_1/' + CLOUDINARY_CLOUD + '/image/upload', {
+  showToast('📤 Uploading receipt…', 'gold');
+  const res  = await fetch('https://api.cloudinary.com/v1_1/' + CLOUDINARY_CLOUD + '/image/upload', {
     method: 'POST',
     body: fd
   });
   const json = await res.json();
+  console.log('Cloudinary response:', JSON.stringify(json));
   if (!res.ok || json.error) {
     const msg = (json.error && json.error.message) || ('HTTP ' + res.status);
     showToast('❌ Receipt upload failed: ' + msg, 'red');
@@ -1162,9 +1164,11 @@ async function submitBooking() {
   const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzgiIM1LfbujitaT3an4egn1NS9bH5Ll3FmjtiHaohmLNHtl0EV1fuB5W-InqNdUUvI/exec';
   try {
     btn.innerHTML = '<span class="spinner"></span> Saving booking\u2026';
-    // Use GET with URL params — most reliable method, no CORS, no body parsing issues
+    console.log('Sending to GAS — receiptUrl:', data.receiptUrl || '(none)');
+    console.log('Full data:', JSON.stringify(data).substring(0, 300));
     const params = new URLSearchParams({ action: 'newBooking', data: JSON.stringify(data) });
     await fetch(SCRIPT_URL + '?' + params.toString(), { method: 'GET', mode: 'no-cors' });
+    console.log('GAS fetch sent');
   } catch(e) { console.warn('Sheets error:', e); }
 
   // ── 3. Show success screen ───────────────────────────────────
