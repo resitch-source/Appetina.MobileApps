@@ -1158,13 +1158,12 @@ async function submitBooking() {
   const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzgiIM1LfbujitaT3an4egn1NS9bH5Ll3FmjtiHaohmLNHtl0EV1fuB5W-InqNdUUvI/exec';
   try {
     btn.innerHTML = '<span class="spinner"></span> Saving booking\u2026';
-    const fd = new FormData();
-    fd.append('data', JSON.stringify(data));
-    await fetch(SCRIPT_URL, { method:'POST', mode:'no-cors', body: fd });
+    // Use GET with URL params — most reliable method, no CORS, no body parsing issues
+    const params = new URLSearchParams({ action: 'newBooking', data: JSON.stringify(data) });
+    await fetch(SCRIPT_URL + '?' + params.toString(), { method: 'GET', mode: 'no-cors' });
   } catch(e) { console.warn('Sheets error:', e); }
-  }
 
-  // ── 2. Show success screen ───────────────────────────────────
+  // ── 3. Show success screen ───────────────────────────────────
   document.getElementById('bookingRefDisplay').textContent = ref;
   document.getElementById('progressBar').style.display = 'none';
   document.querySelectorAll('.step-panel').forEach(p => p.classList.remove('active'));
