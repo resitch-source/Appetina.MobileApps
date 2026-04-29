@@ -1084,8 +1084,8 @@ function handleReceipt(input) {
 // ── Cloudinary direct browser upload (no CORS issues) ────────
 // Free account: sign up at cloudinary.com, get your cloud_name
 // Then create an unsigned upload preset named "appetina_receipts"
-const CLOUDINARY_CLOUD = 'appetina-catering';        // ← your Cloudinary cloud name
-const CLOUDINARY_PRESET = 'appetina_receipts';       // ← your unsigned upload preset name
+const CLOUDINARY_CLOUD  = 'dmmpvbllb';
+const CLOUDINARY_PRESET = 'appetina_receipts';
 
 async function uploadToCloudinary(file, ref) {
   const fd = new FormData();
@@ -1093,16 +1093,20 @@ async function uploadToCloudinary(file, ref) {
   fd.append('upload_preset', CLOUDINARY_PRESET);
   fd.append('folder', 'appetina_receipts');
   fd.append('public_id', ref + '_receipt');
-  fd.append('tags', ref);
 
-  const res  = await fetch('https://api.cloudinary.com/v1_1/' + CLOUDINARY_CLOUD + '/image/upload', {
+  showToast('📤 Uploading receipt to Cloudinary…', 'gold');
+  const res = await fetch('https://api.cloudinary.com/v1_1/' + CLOUDINARY_CLOUD + '/image/upload', {
     method: 'POST',
     body: fd
   });
-  if (!res.ok) throw new Error('Cloudinary HTTP ' + res.status);
   const json = await res.json();
-  if (json.error) throw new Error(json.error.message);
-  return json.secure_url; // public image URL
+  if (!res.ok || json.error) {
+    const msg = (json.error && json.error.message) || ('HTTP ' + res.status);
+    showToast('❌ Receipt upload failed: ' + msg, 'red');
+    throw new Error(msg);
+  }
+  showToast('✅ Receipt uploaded!', 'gold');
+  return json.secure_url;
 }
 
 async function submitBooking() {
@@ -1122,9 +1126,9 @@ async function submitBooking() {
     try {
       btn.innerHTML = '<span class="spinner"></span> Uploading receipt\u2026';
       receiptUrl = await uploadToCloudinary(state.receiptFile, ref);
-      console.log('Receipt uploaded:', receiptUrl);
+      console.log('✅ Receipt URL:', receiptUrl);
     } catch(e) {
-      console.warn('Cloudinary upload failed:', e.message);
+      console.error('Cloudinary error:', e.message);
       receiptUrl = '';
     }
   }
@@ -1247,10 +1251,12 @@ async function sendChat() {
 }
 
 /* TOAST */
-function showToast(msg,type) {
-  const t=document.getElementById('toast');
-  t.textContent=msg; t.className='toast'+(type?' '+type:'')+' show';
-  setTimeout(function(){ t.classList.remove('show'); },3200);
+function showToast(msg, type) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = 'toast' + (type ? ' ' + type : '') + ' show';
+  clearTimeout(t._t);
+  t._t = setTimeout(() => t.classList.remove('show'), type === 'red' ? 6000 : 3200);
 }
 
 /* INIT */
