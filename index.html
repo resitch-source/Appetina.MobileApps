@@ -1110,9 +1110,9 @@ async function submitBooking() {
   };
   // ── 1. Google Sheets + Email (via Apps Script) ──────────────
   // Paste your deployed Web App URL below after setting up the Apps Script
-  const SCRIPT_URL = 'YOUR_GOOGLE_APPS_SCRIPT_URL_HERE';
+  const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbywmzFZOa2D1mBSk-z4WcVmEiiSYHe1ZsWoF7QF8cwbAw7RmhBPvfizWc0CVrn22y9MCQ/exec';
   try {
-    if (SCRIPT_URL !== 'YOUR_GOOGLE_APPS_SCRIPT_URL_HERE') {
+    if (SCRIPT_URL !== 'https://script.google.com/macros/s/AKfycbywmzFZOa2D1mBSk-z4WcVmEiiSYHe1ZsWoF7QF8cwbAw7RmhBPvfizWc0CVrn22y9MCQ/exec') {
       await fetch(SCRIPT_URL, {
         method: 'POST',
         mode: 'no-cors',
