@@ -486,7 +486,7 @@ footer{background:#110D08;padding:2.5rem 1.5rem;text-align:center;}
             <span style="font-size:2rem;">🐷</span>
             <div>
               <div style="font-weight:700;color:#8B4513;font-size:1rem;letter-spacing:0.01em;">Add Lechon <span style="font-size:0.72rem;background:#C9A84C;color:#fff;border-radius:4px;padding:2px 7px;margin-left:4px;vertical-align:middle;">Optional</span></div>
-              <div style="font-size:0.8rem;color:#888;margin-top:2px;">Whole roasted pig · A <strong>25–30 kgs</strong> · <strong style="color:#8B4513;">₱9,000</strong></div>
+              <div style="font-size:0.8rem;color:#888;margin-top:2px;">Whole roasted pig · Good for <strong>30–50 pax</strong> · <strong style="color:#8B4513;">₱9,000</strong></div>
             </div>
           </div>
           <label style="display:flex;align-items:center;gap:0.6rem;cursor:pointer;user-select:none;">
@@ -668,7 +668,7 @@ footer{background:#110D08;padding:2.5rem 1.5rem;text-align:center;}
         <div style="font-size:0.78rem;font-weight:600;color:var(--brown);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:0.65rem;">Scan QR Code to Pay</div>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.75rem;" id="qrGrid">
 
-          <!-- GCash QR -->
+          <!-- GCash Payment -->
           <div class="qr-card" id="qrGcash">
             <div class="qr-card-header" style="background:linear-gradient(135deg,#007DFF,#00C0FF);">
               <div class="qr-logo">📱</div>
@@ -678,15 +678,26 @@ footer{background:#110D08;padding:2.5rem 1.5rem;text-align:center;}
               </div>
             </div>
             <div class="qr-body">
-              <div class="qr-amount-label">Amount to Pay</div>
+              <div class="qr-amount-label">Amount to Send</div>
               <div class="qr-amount-val" id="qrAmtGcash">₱—</div>
-              <div id="qrCodeGcash" class="qr-code-wrap"></div>
-              <div class="qr-name">Cyril Lacida Sitchon</div>
-              <button class="qr-save-btn" onclick="saveQR('qrCodeGcash','GCash_Payment')">⬇ Save QR</button>
+              <!-- GCash instructions -->
+              <div style="background:#e8f4ff;border-radius:8px;padding:0.75rem;margin:0.5rem 0;text-align:left;font-size:0.78rem;line-height:1.7;">
+                <div style="font-weight:700;color:#007DFF;margin-bottom:0.3rem;">📲 How to Pay via GCash:</div>
+                <div>1. Open <strong>GCash app</strong></div>
+                <div>2. Tap <strong>Send Money</strong></div>
+                <div>3. Enter number: <strong style="font-size:0.9rem;">0906 239 0453</strong></div>
+                <div>4. Enter amount: <strong id="gcashAmtDisplay" style="color:#007DFF;">₱—</strong></div>
+                <div>5. Message: <strong>Appetina Booking</strong></div>
+              </div>
+              <a id="gcashOpenBtn" href="#" target="_blank"
+                style="display:block;background:#007DFF;color:#fff;text-align:center;padding:0.6rem;border-radius:8px;font-weight:700;font-size:0.85rem;text-decoration:none;margin-top:0.4rem;">
+                📱 Open GCash App
+              </a>
+              <div class="qr-name" style="margin-top:0.5rem;">Cyril Lacida Sitchon</div>
             </div>
           </div>
 
-          <!-- BPI / Debit / Credit Card QR -->
+          <!-- BPI Bank Transfer -->
           <div class="qr-card" id="qrBpi">
             <div class="qr-card-header" style="background:linear-gradient(135deg,#CC0000,#FF4444);">
               <div class="qr-logo">🏦</div>
@@ -696,11 +707,17 @@ footer{background:#110D08;padding:2.5rem 1.5rem;text-align:center;}
               </div>
             </div>
             <div class="qr-body">
-              <div class="qr-amount-label">Amount to Pay</div>
+              <div class="qr-amount-label">Amount to Transfer</div>
               <div class="qr-amount-val" id="qrAmtBpi">₱—</div>
-              <div id="qrCodeBpi" class="qr-code-wrap"></div>
-              <div class="qr-name">Cyril Lacida Sitchon</div>
-              <button class="qr-save-btn" onclick="saveQR('qrCodeBpi','BPI_Payment')">⬇ Save QR</button>
+              <div id="qrCodeBpi" class="qr-code-wrap" style="margin:0.5rem auto;"></div>
+              <div style="background:#fff0f0;border-radius:8px;padding:0.6rem;text-align:left;font-size:0.75rem;line-height:1.7;margin-top:0.3rem;">
+                <div style="font-weight:700;color:#CC0000;margin-bottom:0.2rem;">🏦 BPI Account Details:</div>
+                <div>Account Name: <strong>Cyril Lacida Sitchon</strong></div>
+                <div>Account No: <strong style="font-size:0.9rem;">9359672591</strong></div>
+                <div>Amount: <strong id="bpiAmtDisplay" style="color:#CC0000;">₱—</strong></div>
+                <div>Branch: <strong>Iligan City</strong></div>
+              </div>
+              <button class="qr-save-btn" onclick="saveQR('qrCodeBpi','BPI_QR')" style="margin-top:0.5rem;">⬇ Save QR</button>
             </div>
           </div>
 
@@ -1368,67 +1385,48 @@ function getPayableAmount() {
 function generateQRCodes(amount) {
   if (!amount || amount <= 0) return;
   const fmt = amount.toLocaleString();
-  const ref  = state.bookingRef || 'Appetina Booking';
+  const ref  = state.bookingRef || 'Appetina-Booking';
 
-  document.getElementById('qrAmtGcash').textContent = '₱' + fmt;
-  document.getElementById('qrAmtBpi').textContent   = '₱' + fmt;
+  document.getElementById('qrAmtGcash').textContent = '\u20b1' + fmt;
+  document.getElementById('qrAmtBpi').textContent   = '\u20b1' + fmt;
 
-  // GCash QR — standard EMVCo-like plain text format scannable by GCash app
-  const gcashData =
-    'GCASH PAYMENT\n' +
-    'Pay to: ' + GCASH_NAME + '\n' +
-    'Number: ' + GCASH_NUM + '\n' +
-    'Amount: PHP ' + amount + '\n' +
-    'Reference: ' + ref;
+  // GCash: open GCash app send money to the number
+  // This deep link opens GCash app on mobile directly to send money screen
+  const gcashDeepLink = 'https://gcash.com/qr/send?mobileNumber=' + GCASH_NUM + '&amount=' + amount + '&remarks=' + encodeURIComponent(ref);
 
-  // BPI QR — plain text format scannable by BPI app
-  const bpiData =
-    'BPI BANK TRANSFER\n' +
-    'Account Name: ' + BPI_NAME + '\n' +
-    'Account No: ' + BPI_ACC + '\n' +
-    'Amount: PHP ' + amount + '\n' +
-    'Reference: ' + ref;
+  const gcashBtn = document.getElementById('gcashOpenBtn');
+  if (gcashBtn) gcashBtn.href = gcashDeepLink;
 
-  renderQR('qrCodeGcash', gcashData, '#007DFF');
-  renderQR('qrCodeBpi',   bpiData,   '#CC0000');
+  // Update amount displays
+  const gcashAmtEl = document.getElementById('gcashAmtDisplay');
+  const bpiAmtEl   = document.getElementById('bpiAmtDisplay');
+  if (gcashAmtEl) gcashAmtEl.textContent = '\u20b1' + fmt;
+  if (bpiAmtEl)   bpiAmtEl.textContent   = '\u20b1' + fmt;
+
+  // Generate a simple info QR for BPI (account details)
+  const bpiData = 'BPI|' + BPI_ACC + '|' + BPI_NAME + '|PHP ' + amount + '|' + ref;
+  renderQR('qrCodeBpi', bpiData, '#CC0000');
 }
 
 function renderQR(wrapId, data, color) {
   const wrap = document.getElementById(wrapId);
   if (!wrap) return;
 
-  // Show loading spinner while QR image loads
   wrap.innerHTML = '<div style="width:180px;height:180px;display:flex;align-items:center;justify-content:center;background:#f5f0eb;border-radius:6px;"><div style="width:28px;height:28px;border:3px solid #ddd;border-top-color:' + color + ';border-radius:50%;animation:spin 0.7s linear infinite;"></div></div>';
 
-  const hex = color.replace('#', '');
+  const hex = color.replace('#','');
   const url = 'https://api.qrserver.com/v1/create-qr-code/'
-    + '?size=180x180'
-    + '&ecc=M'
-    + '&color=' + hex
-    + '&bgcolor=ffffff'
-    + '&qzone=1'
+    + '?size=180x180&ecc=M&color=' + hex
+    + '&bgcolor=ffffff&qzone=1'
     + '&data=' + encodeURIComponent(data);
 
   const img = new Image();
-  img.alt   = 'QR Code';
+  img.alt = 'QR Code';
   img.style.cssText = 'width:180px;height:180px;display:block;border-radius:6px;';
-
-  img.onload = function() {
-    wrap.innerHTML = '';
-    wrap.appendChild(this);
-  };
+  img.onload  = function() { wrap.innerHTML=''; wrap.appendChild(this); };
   img.onerror = function() {
-    // Fallback to Google Charts
-    const img2 = new Image();
-    img2.src = 'https://chart.googleapis.com/chart?cht=qr&chs=180x180&chld=M|1&chl=' + encodeURIComponent(data);
-    img2.alt = 'QR Code';
-    img2.style.cssText = 'width:180px;height:180px;display:block;border-radius:6px;';
-    img2.onload = function() { wrap.innerHTML = ''; wrap.appendChild(this); };
-    img2.onerror = function() {
-      wrap.innerHTML = '<div style="width:180px;height:180px;display:flex;align-items:center;justify-content:center;font-size:0.75rem;color:#888;text-align:center;padding:1rem;background:#f5f0eb;border-radius:6px;">QR unavailable.<br>Check connection.</div>';
-    };
+    wrap.innerHTML = '<div style="width:180px;height:180px;display:flex;align-items:center;justify-content:center;font-size:0.75rem;color:#888;text-align:center;padding:1rem;background:#f5f0eb;border-radius:6px;">QR unavailable.<br>Use account details below.</div>';
   };
-
   img.src = url;
 }
 
@@ -1437,8 +1435,6 @@ function saveQR(wrapId, filename) {
   if (!wrap) return;
   const img = wrap.querySelector('img');
   if (!img) return;
-
-  // Open image in new tab for user to long-press save on mobile
   const a = document.createElement('a');
   a.href = img.src;
   a.download = filename + '_PHP' + getPayableAmount() + '.png';
