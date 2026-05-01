@@ -307,20 +307,9 @@ footer{background:#110D08;padding:2.5rem 1.5rem;text-align:center;}
       </div>
       <div class="divider"></div>
       <div class="form-label" style="margin-bottom:0.75rem;">Select Package *</div>
-      <div class="packages-grid">
-        <div class="pkg-card" onclick="selectPkg(this,13000,30)"><div class="pkg-price">&#8369;13K</div><div class="pkg-pax">30 Guests</div></div>
-        <div class="pkg-card" onclick="selectPkg(this,16000,40)"><div class="pkg-price">&#8369;16K</div><div class="pkg-pax">40 Guests</div></div>
-        <div class="pkg-card" onclick="selectPkg(this,20000,50)"><div class="pkg-price">&#8369;20K</div><div class="pkg-pax">50 Guests</div></div>
-        <div class="pkg-card" onclick="selectPkg(this,40000,100)"><div class="pkg-price">&#8369;40K</div><div class="pkg-pax">100 Guests</div></div>
-        <div class="pkg-card" onclick="selectPkg(this,60000,150)"><div class="pkg-price">&#8369;60K</div><div class="pkg-pax">150 Guests</div></div>
-        <div class="pkg-custom" id="customPkgCard" onclick="selectCustomPkg(this)">
-          <div class="pkg-price" style="font-size:1.3rem;color:var(--text-muted)">Custom</div>
-          <div class="pkg-pax">Enter Guest Count</div>
-          <div class="custom-pax-row" id="customPaxRow" style="display:none">
-            <input type="number" id="customPaxInput" placeholder="e.g. 75" min="10" max="500" onclick="event.stopPropagation()" oninput="calcCustomPrice()"/>
-            <span style="font-size:0.8rem;color:var(--text-muted)">guests</span>
-          </div>
-          <div id="customPriceDisplay" style="margin-top:0.5rem;font-size:0.85rem;color:var(--gold);display:none"></div>
+      <div class="packages-grid" id="packagesGrid">
+        <div style="grid-column:1/-1;text-align:center;padding:1rem;color:var(--text-muted);font-size:0.85rem;">
+          <span class="spinner" style="display:inline-block;margin-right:0.4rem;vertical-align:middle;"></span>Loading packages…
         </div>
       </div>
       <div class="inclusions-box">
@@ -328,7 +317,7 @@ footer{background:#110D08;padding:2.5rem 1.5rem;text-align:center;}
         <div class="inc-grid">
           <div class="inc-item"><span>&#129385;</span>5 Main Menus (Beef, Fish, Chicken, Pasta/Noodles, Veggie)</div>
           <div class="inc-item"><span>&#127834;</span>Rice &amp; 2 kinds of Desserts</div>
-          <div class="inc-item"><span>&#129380;</span>Softdrinks or Juices &amp; Mineral Water</div>
+          <div class="inc-item"><span>&#129380;</span>Softdrinks or Mineral Water</div>
           <div class="inc-item"><span>&#127869;&#65039;</span>Full Buffet Setup</div>
           <div class="inc-item"><span>&#128144;</span>Table Centerpieces with Accessories</div>
           <div class="inc-item"><span>&#129954;</span>Charger Plates &amp; Dinner Plates</div>
@@ -474,8 +463,8 @@ footer{background:#110D08;padding:2.5rem 1.5rem;text-align:center;}
       <div class="menu-section-header"><div class="menu-tag" style="background:#4A7AA8;">Drinks</div><div class="menu-category-title">Beverages</div><div class="menu-note">Choose 1</div></div>
       <div class="drinks-opts" id="menu-drinks">
         <div class="drink-opt" onclick="selectDrink(this,'Softdrinks (Assorted)')">&#129380; Softdrinks<br><small style="opacity:0.6">Assorted</small></div>
-        <div class="drink-opt" onclick="selectDrink(this,'Fruit Juices (Assorted)')">&#129379; Fruit Juices<br><small style="opacity:0.6">Assorted</small></div>
-        <div class="drink-opt" onclick="selectDrink(this,'Both Softdrinks &amp; Juices')">&#10024; Both<br><small style="opacity:0.6">Softdrinks + Juices</small></div>
+        <div class="drink-opt" onclick="selectDrink(this,'Mineral Water')">&#128167; Mineral Water<br><small style="opacity:0.6">Bottled</small></div>
+        <div class="drink-opt" onclick="selectDrink(this,'Both Softdrinks &amp; Mineral Water')">&#10024; Both<br><small style="opacity:0.6">Softdrinks + Water</small></div>
       </div>
       <p style="font-size:0.78rem;color:var(--text-muted);margin-top:0.5rem;">* Mineral Water &amp; Rice always included</p>
 
@@ -486,7 +475,7 @@ footer{background:#110D08;padding:2.5rem 1.5rem;text-align:center;}
             <span style="font-size:2rem;">🐷</span>
             <div>
               <div style="font-weight:700;color:#8B4513;font-size:1rem;letter-spacing:0.01em;">Add Lechon <span style="font-size:0.72rem;background:#C9A84C;color:#fff;border-radius:4px;padding:2px 7px;margin-left:4px;vertical-align:middle;">Optional</span></div>
-              <div style="font-size:0.8rem;color:#888;margin-top:2px;">Whole roasted pig · Good for <strong>30–50 pax</strong> · <strong style="color:#8B4513;">₱9,000</strong></div>
+              <div style="font-size:0.8rem;color:#888;margin-top:2px;">Whole roasted pig · <strong>25–30 kgs</strong> · <strong style="color:#8B4513;">₱9,000</strong></div>
             </div>
           </div>
           <label style="display:flex;align-items:center;gap:0.6rem;cursor:pointer;user-select:none;">
@@ -837,7 +826,7 @@ footer{background:#110D08;padding:2.5rem 1.5rem;text-align:center;}
           <tr><td>&#129382; Veggie</td><td>1</td><td>Crispy Kangkong ⭐, Four Season w/ Crab Meat, Chopsuey w/ Quail Egg, Stir Fry Mixed, Sautéed Green Beans, Lumpia Shanghai Veggie, Pinakbet, Buttered Veggies, Butternut Squash Curry</td></tr>
           <tr><td>&#127837; Pasta</td><td>1</td><td>Beef Carbonara, Beef Spaghetti, Beef Lasagna, Palabok (Beef &amp; Shrimp), Crispy Noodles, Pancit Canton, Sotanghon Guisado, Macaroni Salad, Bam-I Special</td></tr>
           <tr><td>&#127854; Dessert</td><td>2</td><td>Choco Brownies, Cheese Stick, Macaroons, Buko Pandan, Mango Tapioca, Mix Fruits Tapioca, Fruit Salad, Buko Salad, Black Zambo, Window Cathedral, Dorian/Ube/Buko/Mango Maja Special, Peanut Butter Bites, Cassava Bites, Banana Bites, Carrot Bites, Chocolate Crinkles, Moist Carrot Bites, Custard Bites, Yema Bites, Kakanin</td></tr>
-          <tr><td>&#129380; Drinks</td><td>1</td><td>Softdrinks, Juices, or Both</td></tr>
+          <tr><td>&#129380; Drinks</td><td>1</td><td>Softdrinks, Mineral Water, or Both</td></tr>
         </table>
         <p style="font-size:0.78rem;color:var(--text-muted);margin-top:0.5rem;">⭐ = Best Seller</p>
         <div class="help-tip">Menu selections are final 7 days before your event.</div>
@@ -1664,6 +1653,67 @@ function showToast(msg, type) {
 /* INIT */
 renderProgress();
 document.getElementById('eventDate').min = new Date().toISOString().split('T')[0];
+loadConfig();
+
+// -- LOAD PACKAGES FROM GOOGLE SHEETS CONFIG --------------------
+async function loadConfig() {
+  try {
+    const res  = await fetch(GAS_URL + '?action=config');
+    const json = await res.json();
+    if (!json.success) throw new Error(json.error || 'Failed');
+    renderPackages(json.packages || []);
+    // Update addon price if configured
+    if (json.addonPrice) window._addonPricePerHead = json.addonPrice;
+  } catch(e) {
+    console.warn('Config load error:', e.message);
+    // Fallback to hardcoded defaults if fetch fails
+    renderPackages([
+      { label: '30 Guests',  price: 13000, pax: 30  },
+      { label: '40 Guests',  price: 16000, pax: 40  },
+      { label: '50 Guests',  price: 20000, pax: 50  },
+      { label: '100 Guests', price: 40000, pax: 100 },
+      { label: '150 Guests', price: 60000, pax: 150 },
+      { label: 'Custom',     price: 0,     pax: 0   }
+    ]);
+  }
+}
+
+function renderPackages(packages) {
+  const grid = document.getElementById('packagesGrid');
+  if (!grid) return;
+  grid.innerHTML = '';
+
+  packages.forEach(function(pkg) {
+    const isCustom = pkg.pax === 0;
+    const card = document.createElement('div');
+
+    if (isCustom) {
+      card.className = 'pkg-custom';
+      card.id = 'customPkgCard';
+      card.innerHTML =
+        '<div class="pkg-price" style="font-size:1.3rem;color:var(--text-muted)">Custom</div>' +
+        '<div class="pkg-pax">Enter Guest Count</div>' +
+        '<div class="custom-pax-row" id="customPaxRow" style="display:none">' +
+        '<input type="number" id="customPaxInput" placeholder="e.g. 75" min="10" max="500"' +
+        ' onclick="event.stopPropagation()" oninput="calcCustomPrice()"/>' +
+        '<span style="font-size:0.8rem;color:var(--text-muted)">guests</span></div>' +
+        '<div id="customPriceDisplay" style="margin-top:0.5rem;font-size:0.85rem;color:var(--gold);display:none"></div>';
+      card.onclick = function() { selectCustomPkg(this); };
+    } else {
+      card.className = 'pkg-card';
+      const priceLabel = pkg.price >= 1000
+        ? '\u20b1' + (pkg.price / 1000) + 'K'
+        : '\u20b1' + pkg.price.toLocaleString();
+      card.innerHTML =
+        '<div class="pkg-price">' + priceLabel + '</div>' +
+        '<div class="pkg-pax">' + pkg.label + '</div>';
+      card.onclick = (function(p) {
+        return function() { selectPkg(this, p.price, p.pax); };
+      })(pkg);
+    }
+    grid.appendChild(card);
+  });
+}
 </script>
 <div id="mapPickerOverlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:900;align-items:center;justify-content:center;padding:1rem;">
   <div style="background:#fff;border-radius:14px;width:100%;max-width:600px;max-height:90vh;display:flex;flex-direction:column;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,0.4);">
