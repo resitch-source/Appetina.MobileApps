@@ -1684,16 +1684,17 @@ loadConfig();
 
 // -- LOAD PACKAGES FROM GOOGLE SHEETS CONFIG --------------------
 async function loadConfig() {
-  // Show loading state in all menu containers immediately
   ['menu-beef','menu-fish','menu-chicken','menu-veggie','menu-pasta','menu-dessert'].forEach(function(id) {
     var el = document.getElementById(id);
     if (el) el.innerHTML = '<div style="padding:0.5rem;color:var(--text-muted);font-size:0.8rem;">Loading...</div>';
   });
 
   try {
-    const res  = await fetch(GAS_URL + '?action=config');
+    // Cache buster timestamp forces fresh response from Apps Script
+    const res  = await fetch(GAS_URL + '?action=config&ts=' + Date.now());
     const json = await res.json();
     if (!json.success) throw new Error(json.error || 'Failed');
+    console.log('Config loaded. Fish items:', (json.menus && json.menus.fish || []).length);
     renderPackages(json.packages || []);
     if (json.addonPrice) window._addonPricePerHead = json.addonPrice;
     if (json.menus) {
@@ -1702,7 +1703,6 @@ async function loadConfig() {
     }
   } catch(e) {
     console.warn('Config load error:', e.message);
-    // Fallback — restore hardcoded menus
     applyMenuConfig(null);
     renderPackages([
       { label:'30 Guests',  price:13000, pax:30  },
