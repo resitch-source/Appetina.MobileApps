@@ -1684,19 +1684,26 @@ loadConfig();
 
 // -- LOAD PACKAGES FROM GOOGLE SHEETS CONFIG --------------------
 async function loadConfig() {
+  // Show loading state in all menu containers immediately
+  ['menu-beef','menu-fish','menu-chicken','menu-veggie','menu-pasta','menu-dessert'].forEach(function(id) {
+    var el = document.getElementById(id);
+    if (el) el.innerHTML = '<div style="padding:0.5rem;color:var(--text-muted);font-size:0.8rem;">Loading...</div>';
+  });
+
   try {
     const res  = await fetch(GAS_URL + '?action=config');
     const json = await res.json();
     if (!json.success) throw new Error(json.error || 'Failed');
     renderPackages(json.packages || []);
-    if (json.addonPrice)  window._addonPricePerHead = json.addonPrice;
+    if (json.addonPrice) window._addonPricePerHead = json.addonPrice;
     if (json.menus) {
       applyMenuConfig(json.menus);
       buildAddonMenus(json.menus);
     }
   } catch(e) {
     console.warn('Config load error:', e.message);
-    // Fallback to hardcoded defaults
+    // Fallback — restore hardcoded menus
+    applyMenuConfig(null);
     renderPackages([
       { label:'30 Guests',  price:13000, pax:30  },
       { label:'40 Guests',  price:16000, pax:40  },
@@ -1705,12 +1712,45 @@ async function loadConfig() {
       { label:'150 Guests', price:60000, pax:150 },
       { label:'Custom',     price:0,     pax:0   }
     ]);
-    // Keep hardcoded menu as-is if fetch fails
   }
 }
 
 // Apply menu config from Google Sheets to the menu option divs
 function applyMenuConfig(menus) {
+  if (!menus) {
+    console.warn('applyMenuConfig: no menu data - restoring hardcoded defaults');
+    // Restore hardcoded items if Sheets unavailable
+    var defaults = {
+      'menu-beef': [
+        {name:'Beef Kare-Kara',best:true},{name:'Beef Steak Filipino',best:false},{name:'Beef Filipino Picadillo',best:false},
+        {name:'Beef Tips with Mushroom',best:false},{name:'Beef Salpicao',best:false},{name:'Beef Caldereta',best:false},
+        {name:'Beef Stew',best:false},{name:'Beef Afritada',best:false},{name:'Beef Mechado',best:false},
+        {name:'Mongolian Beef',best:false},{name:'Beef Rendang',best:false},{name:'Lengua Estofado',best:false},
+        {name:'Braised Beef',best:false},{name:'Beef Brisket',best:false},{name:'Beef Steak with Broccoli',best:false}
+      ],
+      'menu-fish': [
+        {name:'Fish Fillet Mango Sauce',best:true},{name:'Fish Fillet Sweet & Sour',best:false},
+        {name:'Fish Fillet with Tausi',best:false},{name:'Fish Fillet Lemon Garlic with Butter',best:false},
+        {name:'Fish Fillet with Pineapple Salsa',best:false},{name:'Grilled Fish with Side Dish Veggies',best:false},
+        {name:'Breaded Fish with Mustard Sauce',best:false}
+      ]
+    };
+    Object.keys(defaults).forEach(function(id) {
+      var el = document.getElementById(id);
+      if (!el) return;
+      var cat = id.replace('menu-','');
+      el.innerHTML = defaults[id].map(function(i){
+        var badge = i.best ? ' <span style="font-size:0.7rem;background:#B8860B;color:#fff;border-radius:4px;padding:1px 5px;">Best Seller</span>' : '';
+        return '<div class="menu-opt" onclick="selectMenu(\''+cat+'\',this)">'+i.name+badge+'</div>';
+      }).join('');
+    });
+    return;
+  }
+
+  var counts = {};
+  Object.keys(menus).forEach(function(k){ counts[k] = (menus[k]||[]).length; });
+  console.log('applyMenuConfig received:', JSON.stringify(counts));
+
   var catMap = {
     beef:    { id:'menu-beef',    fn:'beef'    },
     fish:    { id:'menu-fish',    fn:'fish'    },
