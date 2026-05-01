@@ -1062,7 +1062,9 @@ function checkNext1() {
 }
 
 /* ADDON ORDERS */
-const ADDON_MENUS = {
+// ADDON_MENUS is built dynamically from Google Sheets config
+// Falls back to hardcoded defaults if config not loaded yet
+let ADDON_MENUS = {
   'Beef':['Beef Kare-Kara ⭐ Best Seller','Beef Steak Filipino','Beef Filipino Picadillo','Beef Tips with Mushroom','Beef Salpicao','Beef Caldereta','Beef Stew','Beef Afritada','Beef Mechado','Mongolian Beef','Beef Rendang','Lengua Estofado','Braised Beef','Beef Brisket','Beef Steak with Broccoli'],
   'Fish':['Fish Fillet Mango Sauce ⭐ Best Seller','Fish Fillet Sweet & Sour','Fish Fillet with Tausi','Fish Fillet Lemon Garlic with Butter','Fish Fillet with Pineapple Salsa','Grilled Fish with Side Dish Veggies','Breaded Fish with Mustard Sauce'],
   'Chicken':['Buttered Chicken','Buttered Chicken with Lumpia Shanghai','Chicken Teriyaki','Chicken with Mango Curry','Turmeric Chicken','Chicken Paprikash','Chicken Meatballs with Butter Cauliflower','Breaded Chicken with Sauce','Appetina Roasted Chicken','Appetina Chicken Inasal','Chicken Cordon Bleu','Chicken Curry','Chicken Caldereta','Chicken Afritada'],
@@ -1070,6 +1072,31 @@ const ADDON_MENUS = {
   'Pasta/Noodles':['Beef Carbonara','Beef Spaghetti','Beef Lasagna','Palabok Beef and Shrimp','Crispy Noodles (Seafoods or Meat)','Pancit Canton (Seafoods or Meat)','Sotanghon Guisado','Macaroni Salad','Bam-I Special'],
   'Dessert':['Choco Brownies','Cheese Stick','Macaroons','Buko Pandan','Mango Tapioca','Mix Fruits Tapioca','Fruit Salad','Buko Salad','Black Zambo','Window Cathedral','Dorian Maja Special','Ube Maja Special','Buko Maja Special','Mango Maja Special','Peanut Butter Bites','Cassava Bites','Banana Bites','Carrot Bites','Chocolate Crinkles','Moist Carrot Bites','Custard Bites','Yema Bites','Kakanin']
 };
+
+// Rebuild ADDON_MENUS from Google Sheets menu config
+function buildAddonMenus(menus) {
+  const catMap = {
+    beef:    'Beef',
+    fish:    'Fish',
+    chicken: 'Chicken',
+    veggie:  'Veggie',
+    pasta:   'Pasta/Noodles',
+    dessert: 'Dessert'
+    // drinks excluded from addons
+  };
+  const built = {};
+  Object.keys(catMap).forEach(function(cat) {
+    const items = menus[cat];
+    if (!items || !items.length) return;
+    built[catMap[cat]] = items.map(function(i) {
+      return i.name + (i.best ? ' \u2b50 Best Seller' : '');
+    });
+  });
+  if (Object.keys(built).length > 0) {
+    ADDON_MENUS = built;
+    console.log('ADDON_MENUS updated from Sheets config');
+  }
+}
 let addonId = 0;
 
 function addAddonRow() {
@@ -1663,7 +1690,10 @@ async function loadConfig() {
     if (!json.success) throw new Error(json.error || 'Failed');
     renderPackages(json.packages || []);
     if (json.addonPrice)  window._addonPricePerHead = json.addonPrice;
-    if (json.menus)       applyMenuConfig(json.menus);
+    if (json.menus) {
+      applyMenuConfig(json.menus);
+      buildAddonMenus(json.menus);
+    }
   } catch(e) {
     console.warn('Config load error:', e.message);
     // Fallback to hardcoded defaults
