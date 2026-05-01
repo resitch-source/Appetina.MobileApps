@@ -1564,7 +1564,8 @@ async function submitBooking() {
     eventType:  state.eventType,
     package:    state.pkg.label,
     totalPrice: grand,
-    downpayment:Math.ceil(grand*0.5),
+    downpayment: getPayableAmount(),   // actual amount client chose (50%, 100%, or custom)
+    paymentMode: _payMode === '50' ? '50% Downpayment' : _payMode === '100' ? 'Full Payment' : 'Custom Amount',
     numPax:     state.pkg.pax,
     addonOrders:addons,
     lechon:     state.lechon,
@@ -1580,8 +1581,8 @@ async function submitBooking() {
     occasion:   document.getElementById('occasion').value,
     notes:      document.getElementById('specialNotes').value,
     hasReceipt:  receiptUrls.length > 0,
-    receiptUrl:  receiptUrl,           // primary URL for sheet column
-    receiptUrls: receiptUrls           // all URLs for email body
+    receiptUrl:  receiptUrl,
+    receiptUrls: receiptUrls
   };
 
   // ── 2. Send booking data + receipt URL to Google Apps Script ──
