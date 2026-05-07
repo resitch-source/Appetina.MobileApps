@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Share Your Feedback - Appetina Catering</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+body{
+  font-family:'Inter',sans-serif;
+  background:linear-gradient(135deg,#FFF8E7 0%,#F5EDE2 100%);
+  min-height:100vh;
+  display:flex;align-items:center;justify-content:center;
+  padding:1.5rem 1rem;color:#3D2B1F;
+}
+.card{
+  background:#fff;border-radius:18px;max-width:520px;width:100%;
+  box-shadow:0 20px 60px rgba(139,69,19,0.15);overflow:hidden;
+}
+.header{
+  background:linear-gradient(135deg,#C9A84C,#8B4513);
+  color:#fff;padding:2.2rem 1.5rem 1.8rem;text-align:center;
+}
+.header .icon{font-size:3rem;margin-bottom:0.5rem;}
+.header h1{font-family:'Playfair Display',serif;font-size:1.6rem;font-weight:600;margin-bottom:0.3rem;}
+.header p{opacity:0.95;font-size:0.92rem;}
+.body{padding:1.8rem 1.6rem;}
+.ref-pill{
+  display:inline-block;background:#FFF8E7;border:1px solid #C9A84C40;
+  border-radius:20px;padding:5px 14px;font-size:0.78rem;color:#8B4513;
+  font-weight:600;margin-bottom:1rem;
+}
+.label{
+  font-size:0.78rem;font-weight:600;color:#8B4513;
+  text-transform:uppercase;letter-spacing:0.1em;margin-bottom:0.6rem;
+}
+.stars{
+  display:flex;gap:0.5rem;margin-bottom:1.5rem;justify-content:center;
+}
+.star{
+  font-size:2.4rem;cursor:pointer;color:#ddd;
+  transition:transform 0.15s,color 0.15s;
+  user-select:none;-webkit-user-select:none;
+  touch-action:manipulation;
+}
+.star:hover{transform:scale(1.15);}
+.star.active{color:#FFC107;}
+.rating-text{
+  text-align:center;font-size:0.85rem;color:#888;
+  min-height:1.3rem;margin-bottom:1.2rem;
+}
+.rating-text.shown{color:#8B4513;font-weight:600;}
+textarea{
+  width:100%;border:2px solid #e8e0d0;border-radius:10px;
+  padding:0.85rem 1rem;font-size:0.95rem;font-family:inherit;
+  resize:vertical;min-height:120px;outline:none;
+  transition:border-color 0.2s;background:#fffdf9;color:#3D2B1F;
+}
+textarea:focus{border-color:#C9A84C;}
+.char-count{text-align:right;font-size:0.72rem;color:#aaa;margin-top:0.3rem;}
+.submit-btn{
+  width:100%;background:#8B4513;color:#fff;border:none;
+  padding:0.95rem;border-radius:10px;font-size:1rem;font-weight:700;
+  cursor:pointer;font-family:inherit;margin-top:1.2rem;
+  transition:background 0.2s;
+}
+.submit-btn:hover{background:#a0521a;}
+.submit-btn:disabled{opacity:0.5;cursor:not-allowed;}
+.message{
+  margin-top:1rem;padding:0.85rem 1rem;border-radius:8px;
+  font-size:0.88rem;text-align:center;
+}
+.message.success{background:#e8f5e9;color:#1b5e20;border:1px solid #a5d6a7;}
+.message.error{background:#ffebee;color:#b71c1c;border:1px solid #ef9a9a;}
+.thank-you{
+  text-align:center;padding:2rem 1rem;
+}
+.thank-you .big-icon{font-size:4rem;margin-bottom:1rem;}
+.thank-you h2{font-family:'Playfair Display',serif;font-size:1.5rem;color:#8B4513;margin-bottom:0.6rem;}
+.thank-you p{color:#666;line-height:1.7;font-size:0.92rem;margin-bottom:1.5rem;}
+.thank-you a{
+  color:#8B4513;text-decoration:none;font-weight:600;
+  border-bottom:2px solid #C9A84C;padding-bottom:1px;
+}
+.spinner{
+  display:inline-block;width:14px;height:14px;
+  border:2px solid rgba(255,255,255,0.3);border-top-color:#fff;
+  border-radius:50%;animation:spin 0.7s linear infinite;
+  vertical-align:middle;margin-right:6px;
+}
+@keyframes spin{to{transform:rotate(360deg);}}
+</style>
+</head>
+<body>
+
+<div class="card" id="card">
+  <div class="header">
+    <div class="icon">💛</div>
+    <h1>Share Your Experience</h1>
+    <p>We'd love to hear about your event!</p>
+  </div>
+
+  <div class="body" id="formBody">
+    <div style="text-align:center;">
+      <span class="ref-pill" id="refPill">Booking #—</span>
+    </div>
+
+    <div class="label">How would you rate us?</div>
+    <div class="stars" id="stars">
+      <span class="star" data-rating="1">★</span>
+      <span class="star" data-rating="2">★</span>
+      <span class="star" data-rating="3">★</span>
+      <span class="star" data-rating="4">★</span>
+      <span class="star" data-rating="5">★</span>
+    </div>
+    <div class="rating-text" id="ratingText">Tap a star to rate</div>
+
+    <div class="label">Tell us about your experience</div>
+    <textarea id="msgInput" placeholder="The food was amazing! The staff was professional and..." maxlength="500" oninput="updateCharCount()"></textarea>
+    <div class="char-count" id="charCount">0 / 500</div>
+
+    <button class="submit-btn" id="submitBtn" onclick="submitFeedback()">Submit Review ✨</button>
+    <div id="msg"></div>
+  </div>
+</div>
+
+<script>
+const GAS_URL = 'https://script.google.com/macros/s/AKfycbzgiIM1LfbujitaT3an4egn1NS9bH5Ll3FmjtiHaohmLNHtl0EV1fuB5W-InqNdUUvI/exec';
+let _rating = 0;
+
+// Read booking ref from URL
+const urlParams = new URLSearchParams(window.location.search);
+const bookingRef = urlParams.get('ref') || '';
+document.getElementById('refPill').textContent = bookingRef ? 'Booking #' + bookingRef : 'No booking reference';
+
+// Star rating
+const ratings = ['', 'Poor 😞', 'Fair 😐', 'Good 🙂', 'Great 😊', 'Excellent! 🤩'];
+document.querySelectorAll('.star').forEach(star => {
+  star.addEventListener('click', function() {
+    _rating = parseInt(this.dataset.rating);
+    document.querySelectorAll('.star').forEach((s, i) => {
+      s.classList.toggle('active', i < _rating);
+    });
+    const txt = document.getElementById('ratingText');
+    txt.textContent = ratings[_rating];
+    txt.classList.add('shown');
+  });
+});
+
+function updateCharCount() {
+  const len = document.getElementById('msgInput').value.length;
+  document.getElementById('charCount').textContent = len + ' / 500';
+}
+
+async function submitFeedback() {
+  const msgInput = document.getElementById('msgInput');
+  const message  = msgInput.value.trim();
+  const msgEl    = document.getElementById('msg');
+  const btn      = document.getElementById('submitBtn');
+
+  if (!bookingRef) {
+    showMsg('error', 'No booking reference found in the link.');
+    return;
+  }
+  if (_rating < 1) {
+    showMsg('error', 'Please select a star rating.');
+    return;
+  }
+  if (!message) {
+    showMsg('error', 'Please share your thoughts about the event.');
+    msgInput.focus();
+    return;
+  }
+
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner"></span>Submitting…';
+  msgEl.innerHTML = '';
+
+  try {
+    const params = new URLSearchParams({
+      action:  'submitFeedback',
+      ref:     bookingRef,
+      rating:  _rating,
+      message: message
+    });
+    const res  = await fetch(GAS_URL + '?' + params.toString());
+    const json = await res.json();
+
+    if (json.success) {
+      showThankYou();
+    } else {
+      showMsg('error', json.error || 'Could not submit feedback. Please try again.');
+      btn.disabled = false;
+      btn.innerHTML = 'Submit Review ✨';
+    }
+  } catch(e) {
+    showMsg('error', 'Network error. Please check your connection and try again.');
+    btn.disabled = false;
+    btn.innerHTML = 'Submit Review ✨';
+  }
+}
+
+function showMsg(type, text) {
+  const el = document.getElementById('msg');
+  el.className = 'message ' + type;
+  el.textContent = text;
+}
+
+function showThankYou() {
+  document.getElementById('formBody').innerHTML = `
+    <div class="thank-you">
+      <div class="big-icon">🎉</div>
+      <h2>Thank You!</h2>
+      <p>Your feedback has been submitted and means the world to us. After review, we may feature your testimonial on our booking page to inspire future clients.</p>
+      <p style="font-size:0.85rem;color:#888;">We hope to serve you again soon!</p>
+      <a href="https://resitch-source.github.io/Appetina.MobileApps/" target="_blank">← Back to Appetina Catering</a>
+    </div>
+  `;
+}
+</script>
+
+</body>
+</html>
