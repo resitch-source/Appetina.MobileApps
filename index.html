@@ -947,7 +947,7 @@ function selectCustomPkg(el) {
 
 function calcCustomPrice() {
   const pax = parseInt(document.getElementById('customPaxInput').value)||0;
-  const rph = 80;
+  const rph = 400;
   const price = pax*rph;
   const d = document.getElementById('customPriceDisplay');
   if (pax>=10) {
