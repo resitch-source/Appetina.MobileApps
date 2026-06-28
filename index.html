@@ -264,6 +264,9 @@ footer{background:#110D08;padding:2.5rem 1.5rem;text-align:center;}
     <p class="hero-tagline">Fine Dining &middot; Full Buffet &middot; Unforgettable Events</p>
     <div class="hero-divider"></div>
     <button class="hero-cta" onclick="document.getElementById('booking').scrollIntoView({behavior:'smooth'})">Book Your Event</button>
+    <div style="margin-top:1.1rem;">
+      <a href="client-portal.html" style="color:var(--gold-light,#e0c674);font-size:0.9rem;text-decoration:none;border-bottom:1px solid rgba(201,168,76,0.4);padding-bottom:2px;">Already booked? Manage your event &rarr;</a>
+    </div>
   </div>
 </section>
 
@@ -325,7 +328,7 @@ footer{background:#110D08;padding:2.5rem 1.5rem;text-align:center;}
         <div class="inclusions-title">&#9989; Package Inclusions</div>
         <div class="inc-grid">
           <div class="inc-item"><span>&#129385;</span>5 Main Menus (Beef, Fish, Chicken, Pasta/Noodles, Veggie)</div>
-          <div class="inc-item"><span>&#127834;</span>Rice</div>
+          <div class="inc-item"><span>&#127834;</span>Rice (unlimited)</div>
           <div class="inc-item"><span>&#129380;</span>Softdrinks or Mineral Water</div>
           <div class="inc-item"><span>&#127869;&#65039;</span>Full Buffet Setup</div>
           <div class="inc-item"><span>&#128144;</span>Table Centerpieces with Accessories</div>
@@ -736,6 +739,11 @@ footer{background:#110D08;padding:2.5rem 1.5rem;text-align:center;}
           <div>&#128197; Reminder sent 2 days before your event</div>
           <div>&#11088; We will reach out after your event for feedback</div>
         </div>
+        <div style="background:linear-gradient(135deg,rgba(201,168,76,0.08),rgba(107,52,16,0.05));border:1px solid var(--border);border-radius:4px;padding:1rem 1.5rem;max-width:440px;margin:0 auto 1.5rem;text-align:center;">
+          <div style="font-size:0.85rem;color:var(--brown);font-weight:600;margin-bottom:0.4rem;">📋 Manage your event online</div>
+          <div style="font-size:0.82rem;color:var(--text-muted);margin-bottom:0.8rem;">Confirm your final guest count, add dietary notes, and approve your menu anytime.</div>
+          <a href="client-portal.html" class="btn btn-primary" style="display:inline-block;text-decoration:none;padding:0.6rem 1.5rem;font-size:0.88rem;">Open Client Portal &rarr;</a>
+        </div>
         <button class="btn btn-primary" onclick="location.reload()">Book Another Event</button>
       </div>
     </div>
@@ -947,7 +955,7 @@ function selectCustomPkg(el) {
 
 function calcCustomPrice() {
   const pax = parseInt(document.getElementById('customPaxInput').value)||0;
-  const rph = 400;
+  const rph = 80;
   const price = pax*rph;
   const d = document.getElementById('customPriceDisplay');
   if (pax>=10) {
@@ -957,7 +965,7 @@ function calcCustomPrice() {
     document.getElementById('addonSection').style.display = 'block';
     checkNext1();
   } else {
-    d.textContent = 'Minimum 40 guests';
+    d.textContent = 'Minimum 10 guests';
     state.pkg.price = 0; checkNext1();
   }
 }
