@@ -856,7 +856,7 @@ img,svg,canvas{max-width:100%;height:auto;}
           <tr><td>Medium</td><td>50</td><td>&#8369;20,000</td><td>&#8369;400</td></tr>
           <tr><td>Large</td><td>100</td><td>&#8369;40,000</td><td>&#8369;400</td></tr>
           <tr><td>Grand</td><td>150</td><td>&#8369;60,000</td><td>&#8369;400</td></tr>
-          <tr><td>Custom</td><td>10&ndash;500</td><td>Auto-calculated</td><td>&#8369;320&ndash;&#8369;400</td></tr>
+          <tr><td>Custom</td><td>10&ndash;500</td><td>Auto-calculated</td><td>&#8369;433 (&lt;40) / &#8369;400 (40+)</td></tr>
         </table>
         <div class="help-tip">&#128217; Additional Orders: 15&ndash;30 pax at &#8369;80/head. Appears after selecting a package.</div>
         <div class="help-tip" style="margin-top:0.5rem;">&#128055; <strong>Lechon Add-On:</strong> Whole roasted pig (25&ndash;30 kgs) for &#8369;9,000 &mdash; perfect for big celebrations!</div>
@@ -1002,11 +1002,12 @@ function selectCustomPkg(el) {
 
 function calcCustomPrice() {
   const pax = parseInt(document.getElementById('customPaxInput').value)||0;
-  const rph = 80;
+  // Tiered rate: 40+ guests → ₱400/guest; below 40 → ₱433/guest
+  const rph = pax >= 40 ? 400 : 433;
   const price = pax*rph;
   const d = document.getElementById('customPriceDisplay');
   if (pax>=10) {
-    d.textContent = 'Estimated: \u20b1'+price.toLocaleString()+' for '+pax+' guests';
+    d.textContent = 'Estimated: \u20b1'+price.toLocaleString()+' for '+pax+' guests (\u20b1'+rph+'/guest)';
     state.pkg.price = price; state.pkg.pax = pax;
     state.pkg.label = 'Custom Package for '+pax+' Pax';
     document.getElementById('addonSection').style.display = 'block';
