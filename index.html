@@ -1712,6 +1712,7 @@ async function submitBooking() {
     colorMotif: getMotifValue(),
     occasion:   document.getElementById('occasion').value,
     notes:      buildBookingNotes(),
+    venuePin:   (typeof _selectedCoords !== 'undefined' && _selectedCoords) ? (_selectedCoords.lat + ',' + _selectedCoords.lng) : '',
     hasReceipt:  receiptUrls.length > 0,
     receiptUrl:  receiptUrl,
     receiptUrls: receiptUrls
