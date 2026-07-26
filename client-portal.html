@@ -12,6 +12,7 @@
     --gold:#C9A84C; --gold-soft:#e0c674; --text:#f5ede0; --muted:#9b8068; --brown:#6b3410;
     --green:#7cb342; --red:#ef5350;
   }
+  html,body{overscroll-behavior-y:none;}
   body{
     font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;
     background:var(--bg); color:var(--text); min-height:100vh; line-height:1.5;
@@ -64,6 +65,12 @@
   .logout{ text-align:center; margin-top:0.5rem; }
   .logout a{ color:var(--muted); font-size:0.8rem; text-decoration:none; }
   @media(prefers-reduced-motion){ .spinner{ animation:none; } }
+  .stars{ display:flex; gap:0.35rem; margin-bottom:1rem; font-size:2rem; }
+  .star{ cursor:pointer; color:var(--border2); transition:color 0.15s, transform 0.1s; line-height:1; }
+  .star:hover{ transform:scale(1.15); }
+  .star.on{ color:var(--gold); }
+  .fb-thanks{ text-align:center; padding:1rem 0; }
+  .fb-stars-static{ font-size:1.4rem; color:var(--gold); letter-spacing:2px; }
 </style>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;800&display=swap" rel="stylesheet">
 </head>
@@ -123,6 +130,12 @@
         <p class="hint" style="margin-top:0.7rem;margin-bottom:0;">Approving confirms you're happy with the dishes above. You can still contact us for changes.</p>
       </div>
 
+      <!-- Feedback (shown after the event is Done) -->
+      <div class="card" id="feedbackCard" style="display:none;">
+        <div class="card-title">⭐ Share Your Experience</div>
+        <div id="feedbackBody"></div>
+      </div>
+
       <div class="logout"><a href="#" onclick="logout();return false;">← Sign out</a></div>
     </div>
   </div>
@@ -154,6 +167,7 @@ async function portalLogin() {
     if (!json.success) throw new Error(json.error || 'Could not find your booking.');
     _booking = json.booking;
     _creds = { ref: _booking.ref, email: email };
+    try { localStorage.setItem('apPortal', JSON.stringify(_creds)); } catch(e){}
     renderEvent();
   } catch (e) {
     el('loginErr').innerHTML = '<div class="err">' + esc(e.message) + '</div>';
@@ -202,10 +216,11 @@ function renderEvent() {
     el('menuList').innerHTML = '<p style="color:var(--muted);font-size:0.85rem;">Your menu is being finalized — please check back soon or contact us.</p>';
   }
   renderMenuApproval();
+  renderFeedback();
 
-  // Read-only if cancelled/done
+  // Read-only if cancelled/done — but feedback stays enabled for Done events
   if (b.status === 'Cancelled' || b.status === 'Done') {
-    document.querySelectorAll('#eventView input, #eventView textarea, #eventView .btn-ghost, #approveMenuBtn').forEach(elm => {
+    document.querySelectorAll('#eventView input:not(.fb-input), #eventView textarea:not(.fb-input), #eventView .btn-ghost, #approveMenuBtn').forEach(elm => {
       elm.setAttribute('disabled','disabled');
     });
     el('msgArea').innerHTML = '<div class="ok">This event is ' + esc(b.status.toLowerCase()) + '. Details are view-only. Contact us for any changes.</div>';
@@ -222,6 +237,85 @@ function renderMenuApproval() {
     el('menuApprovedBanner').innerHTML = '';
     el('approveMenuBtn').textContent = '✓ Approve This Menu';
     el('approveMenuBtn').disabled = false;
+  }
+}
+
+let _fbRating = 0;
+
+function renderFeedback() {
+  const b = _booking;
+  const card = el('feedbackCard');
+  // Only invite feedback once the event is Done
+  if (b.status !== 'Done') { card.style.display = 'none'; return; }
+  card.style.display = 'block';
+
+  if (b.hasFeedback) {
+    const fb = b.feedback || {};
+    const stars = '★'.repeat(fb.rating || 0) + '☆'.repeat(5 - (fb.rating || 0));
+    if (fb.approved) {
+      el('feedbackBody').innerHTML = `
+        <div style="background:rgba(124,179,66,0.1);border:1px solid var(--green);border-radius:10px;padding:0.6rem;text-align:center;font-size:0.8rem;color:#bfe3a0;margin-bottom:1rem;">
+          ✨ Your review is featured on our booking page — thank you!
+        </div>
+        <div style="background:var(--card);border:1px solid var(--border2);border-radius:12px;padding:1.1rem;">
+          <div class="fb-stars-static" style="text-align:center;margin-bottom:0.6rem;">${stars}</div>
+          <p style="font-size:0.9rem;color:var(--text);font-style:italic;text-align:center;">“${esc(fb.message)}”</p>
+          <p style="font-size:0.7rem;color:var(--muted);text-align:center;margin-top:0.7rem;">— ${esc(b.client)}${fb.submittedAt ? ' · ' + esc(fb.submittedAt) : ''}</p>
+        </div>`;
+    } else {
+      el('feedbackBody').innerHTML = `
+        <div class="fb-thanks"><div style="font-size:2rem;margin-bottom:0.5rem;">💛</div>
+          <p style="font-size:0.9rem;color:var(--text);margin-bottom:1rem;">Thank you for your feedback!</p>
+        </div>
+        <div style="background:var(--card);border:1px solid var(--border);border-radius:12px;padding:1.1rem;">
+          <div class="fb-stars-static" style="text-align:center;margin-bottom:0.6rem;">${stars}</div>
+          <p style="font-size:0.9rem;color:var(--text);font-style:italic;text-align:center;">“${esc(fb.message)}”</p>
+          <p style="font-size:0.72rem;color:var(--muted);text-align:center;margin-top:0.7rem;">⏳ Pending review by our team before it's featured.</p>
+        </div>`;
+    }
+    return;
+  }
+
+  _fbRating = 0;
+  el('feedbackBody').innerHTML = `
+    <p style="font-size:0.85rem;color:var(--muted);margin-bottom:1rem;">We'd love to hear how your event went. Your review may be featured on our booking page (with your permission via our team).</p>
+    <label>Your Rating</label>
+    <div class="stars" id="fbStars">
+      ${[1,2,3,4,5].map(n=>`<span class="star fb-input" data-n="${n}" onclick="setStar(${n})">★</span>`).join('')}
+    </div>
+    <label>Your Review</label>
+    <textarea id="fbMessage" class="fb-input" placeholder="Tell us about the food, service, and your overall experience…"></textarea>
+    <button class="btn btn-primary fb-input" id="fbSubmitBtn" onclick="submitFeedback()">Submit Review</button>`;
+}
+
+function setStar(n) {
+  _fbRating = n;
+  document.querySelectorAll('#fbStars .star').forEach(s => {
+    s.classList.toggle('on', Number(s.dataset.n) <= n);
+  });
+}
+
+async function submitFeedback() {
+  if (_fbRating < 1) { showMsg('Please tap a star to rate your experience.', 'err'); return; }
+  const message = el('fbMessage').value.trim();
+  if (!message) { showMsg('Please write a short review.', 'err'); return; }
+
+  const btn = el('fbSubmitBtn');
+  btn.disabled = true; btn.textContent = 'Submitting…';
+  try {
+    const params = new URLSearchParams({
+      action:'submitFeedback', ref:_creds.ref,
+      rating:_fbRating, message:message
+    });
+    const res = await fetch(SCRIPT_URL + '?' + params.toString() + '&ts=' + Date.now());
+    const json = await res.json();
+    if (!json.success) throw new Error(json.error || 'Could not submit review.');
+    _booking.hasFeedback = true;
+    renderFeedback();
+    showMsg('✓ Thank you for your review!', 'ok');
+  } catch (e) {
+    showMsg(e.message, 'err');
+    btn.disabled = false; btn.textContent = 'Submit Review';
   }
 }
 
@@ -253,8 +347,7 @@ async function saveField(which) {
   } catch (e) { showMsg(e.message, 'err'); }
 }
 
-async function approveMenu() {
-  if (!confirm('Approve this menu? We will take this as your confirmation of the dishes.')) return;
+async function approveMenu() {  if (!confirm('Approve this menu? We will take this as your confirmation of the dishes.')) return;
   try {
     await postUpdate({ menuApproved: 'true' }, '✓ Menu approved — thank you! We will prepare accordingly.');
     _booking.menuApproved = true;
@@ -263,6 +356,7 @@ async function approveMenu() {
 }
 
 function logout() {
+  try { localStorage.removeItem('apPortal'); } catch(e){}
   _booking = null; _creds = { ref:'', email:'' };
   el('eventView').style.display = 'none';
   el('loginCard').style.display = 'block';
@@ -273,6 +367,16 @@ function logout() {
 
 // Allow Enter key to submit login
 ['inRef','inEmail'].forEach(id => el(id).addEventListener('keydown', e => { if (e.key === 'Enter') portalLogin(); }));
+
+// Auto-restore after a page refresh (e.g. mobile pull-to-refresh)
+try {
+  const saved = JSON.parse(localStorage.getItem('apPortal') || 'null');
+  if (saved && saved.ref && saved.email) {
+    el('inRef').value = saved.ref;
+    el('inEmail').value = saved.email;
+    portalLogin();
+  }
+} catch(e){}
 </script>
 </body>
 </html>
