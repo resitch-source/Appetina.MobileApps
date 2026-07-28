@@ -1281,18 +1281,24 @@ function updateAddonSummary() {
 function selectMenu(cat, el) {
   document.querySelectorAll('#menu-'+cat+' .menu-opt').forEach(o=>o.classList.remove('selected'));
   el.classList.add('selected');
-  state.menu[cat] = el.textContent.trim();
+  state.menu[cat] = dishNameOnly(el);
   checkNext2();
+}
+// Capture just the dish name (exclude badge spans like "Best Seller" / price tags)
+function dishNameOnly(el) {
+  const clone = el.cloneNode(true);
+  clone.querySelectorAll('span').forEach(s => s.remove());
+  return clone.textContent.trim();
 }
 
 function selectMenuMulti(cat, el, max) {
   if (el.classList.contains('selected')) {
     el.classList.remove('selected');
-    state.menu[cat] = state.menu[cat].filter(v=>v!==el.textContent.trim());
+    state.menu[cat] = state.menu[cat].filter(v=>v!==dishNameOnly(el));
   } else {
     if (state.menu[cat].length>=max) { showToast('Choose only '+max+' desserts'); return; }
     el.classList.add('selected');
-    state.menu[cat].push(el.textContent.trim());
+    state.menu[cat].push(dishNameOnly(el));
   }
   checkNext2();
 }
