@@ -1891,6 +1891,7 @@ async function loadConfig() {
       if (box) { box.innerHTML = ''; }
     }
     if (json.authProviders) initAuthProviders(json.authProviders);
+    if (json.brand) applyBookingBrand(json.brand);
     renderPackages(json.packages || []);
     if (json.addonPrice) window._addonPricePerHead = json.addonPrice;
     if (json.menus) {
@@ -2283,6 +2284,16 @@ async function restoreClientSession() {
 }
 
 /* Google Identity Services + Facebook SDK (activate when IDs are configured) */
+function applyBookingBrand(b) {
+  try {
+    if (b.name) { document.title = b.name; document.querySelectorAll('.brand-name,.hero-title-name').forEach(el=>el.textContent=b.name); }
+    if (b.logoUrl) {
+      const heroLogo = document.getElementById('heroLogo') || document.querySelector('.hero-logo img, .logo img');
+      if (heroLogo) { heroLogo.src = b.logoUrl; heroLogo.style.display='block'; }
+    }
+  } catch(e){}
+}
+
 function initAuthProviders(providers) {
   _authProviders = providers || {};
   const any = !!(_authProviders.google || _authProviders.facebook);
