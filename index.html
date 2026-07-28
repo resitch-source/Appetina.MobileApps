@@ -376,6 +376,13 @@ body.authed #authGate{display:none !important;}
     <span id="authWelcomeSub" style="color:var(--text-muted);font-size:0.75rem;flex:1;"></span>
     <a href="#" onclick="clientSignOut();return false;" style="color:var(--brown);font-size:0.78rem;">Sign out</a>
   </div>
+  <div id="myBookingsPanel" style="display:none;max-width:820px;margin:0 auto 1.25rem;">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:0.6rem;flex-wrap:wrap;gap:0.4rem;">
+      <div style="font-family:'Cormorant Garamond',serif;font-size:1.2rem;color:var(--brown);">📋 My Bookings</div>
+      <span style="font-size:0.72rem;color:var(--text-muted);">Tap <strong>Repeat</strong> to reuse a booking's details with a new date.</span>
+    </div>
+    <div id="myBookingsList" style="display:flex;flex-direction:column;gap:0.5rem;"></div>
+  </div>
   <div class="progress-bar" id="progressBar"></div>
   <div class="booking-card">
 
@@ -1031,7 +1038,7 @@ function goToStep(n) {
   document.getElementById('panel-'+n).classList.add('active');
   renderProgress();
   document.getElementById('booking').scrollIntoView({behavior:'smooth',block:'start'});
-  if (n===2) { loadAIMenuPreset(); setTimeout(maybeShowFavorites, 600); }
+  if (n===2) { loadAIMenuPreset(); setTimeout(maybeShowFavorites, 600); if (_repeatMenu) setTimeout(applyRepeatMenu, 700); }
   if (n===3) syncStep3();
   if (n===4) resetTermsGate();
   if (n===5) updatePaymentDisplay();
@@ -2175,7 +2182,67 @@ function onClientAuthed(ctoken, profile) {
     ? ('Welcome back — ' + profile.bookingsCount + ' past booking' + (profile.bookingsCount===1?'':'s') + ' on file. Your details are pre-filled.')
     : 'Your details will be saved for faster booking next time.';
   prefillFromProfile(profile);
+  renderMyBookings(profile);
   renderProgress();
+}
+
+function renderMyBookings(profile) {
+  const panel = document.getElementById('myBookingsPanel');
+  const list = document.getElementById('myBookingsList');
+  const hist = (profile && profile.history) || [];
+  if (!hist.length) { panel.style.display = 'none'; return; }
+  const STC = { 'NEW':'#8a7050','Confirmed':'#6b8e4e','Done':'#C9A84C','Cancelled':'#c0603a' };
+  list.innerHTML = hist.map((b, i) => `
+    <div style="background:#fff;border:1px solid var(--border);border-radius:10px;padding:0.7rem 0.9rem;display:flex;align-items:center;gap:0.7rem;flex-wrap:wrap;">
+      <div style="flex:1;min-width:160px;">
+        <div style="font-weight:600;font-size:0.9rem;color:var(--brown);">${esc(b.eventType||b.occasion||'Event')} · ${esc(b.date)}${b.time?' · '+esc(b.time):''}</div>
+        <div style="font-size:0.74rem;color:var(--text-muted);">${esc(b.package||'')}${b.pax?' · '+b.pax+' pax':''}${b.venue?' · '+esc(b.venue):''}</div>
+        <div style="font-size:0.7rem;color:${STC[b.status]||'#8a7050'};font-weight:700;margin-top:0.15rem;">${esc(b.status||'')} · Ref ${esc(b.ref)}</div>
+      </div>
+      <button class="btn btn-primary" style="padding:0.5rem 1rem;font-size:0.82rem;" onclick="repeatBooking(${i})">🔁 Repeat</button>
+    </div>`).join('');
+  panel.style.display = 'block';
+}
+
+function esc(s){ return String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+
+let _repeatMenu = null;
+function repeatBooking(i) {
+  const p = _client && _client.profile;
+  if (!p || !p.history || !p.history[i]) return;
+  const b = p.history[i];
+  // Prefill the details that carry over; leave date/time/package fresh
+  const set = (id, v) => { const el = document.getElementById(id); if (el) el.value = v || ''; };
+  set('clientName', p.name);
+  set('clientEmail', p.email);
+  set('clientContact', p.phone);
+  set('eventVenue', b.venue);
+  set('specialNotes', b.addons ? ('Repeat of ' + b.ref + (b.addons ? ' · previous add-ons: ' + b.addons : '')) : '');
+  // Motif if it matches an option
+  if (b.motif) {
+    const sel = document.getElementById('colorMotif');
+    if (sel) { const opt = [...sel.options].find(o=>o.value.toLowerCase()===b.motif.toLowerCase()); if (opt) { sel.value = opt.value; if (typeof onMotifSelect==='function') onMotifSelect(sel); } }
+  }
+  // Stash the previous menu so it applies on the menu step
+  _repeatMenu = { beef:b.beef, fish:b.fish, chicken:b.chicken, veggie:b.veggie, pasta:b.pasta, drinks:b.drinks, lechon:b.lechon };
+  if (typeof aiPreset !== 'undefined') aiPreset = Object.assign({}, aiPreset||{}, {
+    beef:b.beef, fish:b.fish, chicken:b.chicken, veggie:b.veggie, pasta:b.pasta, drinks:b.drinks });
+  // Jump to step 1 and nudge the client to pick package + new date
+  if (typeof goToStep === 'function') goToStep(1);
+  window.scrollTo({ top:0, behavior:'smooth' });
+  showRepeatToast('↩️ Details from ' + b.ref + ' loaded — pick your package and a new date/time.');
+}
+
+function showRepeatToast(msg) {
+  let t = document.getElementById('repeatToast');
+  if (!t) {
+    t = document.createElement('div');
+    t.id = 'repeatToast';
+    t.style.cssText = 'position:fixed;left:50%;transform:translateX(-50%);bottom:1.5rem;background:var(--brown);color:#fff;padding:0.8rem 1.3rem;border-radius:10px;font-size:0.88rem;z-index:9999;box-shadow:0 6px 20px rgba(0,0,0,0.3);max-width:90vw;text-align:center;transition:opacity 0.3s;';
+    document.body.appendChild(t);
+  }
+  t.textContent = msg; t.style.opacity = '1';
+  clearTimeout(t._h); t._h = setTimeout(()=>{ t.style.opacity = '0'; }, 4000);
 }
 
 function prefillFromProfile(p) {
@@ -2199,6 +2266,7 @@ function clientSignOut() {
   try { localStorage.removeItem('apClientToken'); } catch(e){}
   document.body.classList.remove('authed');
   document.getElementById('authWelcome').style.display = 'none';
+  const mb = document.getElementById('myBookingsPanel'); if (mb) mb.style.display = 'none';
   window.scrollTo(0,0);
 }
 
@@ -2262,6 +2330,17 @@ function fbSignIn() {
 }
 
 /* Personal favorites on the menu step (transparent, history-based) */
+function applyRepeatMenu() {
+  if (!_repeatMenu) return;
+  // aiPreset was already populated from the repeated booking in repeatBooking();
+  // reuse the proven applyAIPreset() which clicks the matching .menu-opt tiles.
+  if (typeof applyAIPreset === 'function') {
+    try { applyAIPreset(); } catch(e) {}
+    showRepeatToast('🍽️ Your previous menu was pre-selected — change anything you like.');
+  }
+  _repeatMenu = null;
+}
+
 function maybeShowFavorites() {
   const p = _client && _client.profile;
   if (!p || !p.favorites || !Object.keys(p.favorites).length) return;
