@@ -994,6 +994,21 @@ body.authed #authGate{display:none !important;}
 
 
 <script>
+// Persistent per-device fingerprint so server-side rate limits are per-visitor,
+// not shared globally (Apps Script can't see real IPs). Soft/clearable, but far
+// better than every visitor colliding into one bucket.
+function deviceFingerprint() {
+  try {
+    let id = localStorage.getItem('apDeviceId');
+    if (!id) {
+      id = 'd' + Date.now().toString(36) + Math.random().toString(36).slice(2, 12);
+      localStorage.setItem('apDeviceId', id);
+    }
+    return id;
+  } catch(e) { return 'nofp' + Math.random().toString(36).slice(2, 10); }
+}
+const _ua = deviceFingerprint();
+
 const state = {
   step: 1,
   eventType: '',
@@ -2165,10 +2180,10 @@ async function doManualAuth() {
       const name = document.getElementById('regName').value.trim();
       const phone = document.getElementById('regPhone').value.trim();
       if (!name) throw new Error('Please enter your full name.');
-      url = GAS_URL + '?action=clientRegister&name=' + encodeURIComponent(name) + '&phone=' + encodeURIComponent(phone)
+      url = GAS_URL + '?action=clientRegister&_ua=' + encodeURIComponent(_ua) + '&name=' + encodeURIComponent(name) + '&phone=' + encodeURIComponent(phone)
           + '&email=' + encodeURIComponent(email) + '&password=' + encodeURIComponent(pass);
     } else {
-      url = GAS_URL + '?action=clientLogin&email=' + encodeURIComponent(email) + '&password=' + encodeURIComponent(pass);
+      url = GAS_URL + '?action=clientLogin&_ua=' + encodeURIComponent(_ua) + '&email=' + encodeURIComponent(email) + '&password=' + encodeURIComponent(pass);
     }
     const res = await fetch(url + '&ts=' + Date.now());
     const json = await res.json();
@@ -2253,19 +2268,25 @@ function showRepeatToast(msg) {
 }
 
 function prefillFromProfile(p) {
-  const set = (id, v) => { const el = document.getElementById(id); if (el && v && !el.value) el.value = v; };
+  if (!p) return;
+  // Overwrite (not "fill if empty") — this runs right at login, and is the
+  // authoritative moment to sync the form to *this* signed-in client. Without
+  // overwriting, a second login (a different client, or a repeat login after
+  // sign-out) would silently keep the previous person's leftover data.
+  const set = (id, v) => { const el = document.getElementById(id); if (el && v) el.value = v; };
   set('clientName', p.name);
   set('clientEmail', p.email);
   set('clientContact', p.phone);
   set('eventVenue', p.lastVenue);
-  // Motif: select if it matches an option, else custom
+  // Motif: select if it matches an option, else leave as-is for custom entry
   if (p.lastMotif) {
-    const sel = document.getElementById('motifSelect');
+    const sel = document.getElementById('colorMotif');
     if (sel) {
       const opt = [...sel.options].find(o => o.value.toLowerCase() === p.lastMotif.toLowerCase());
-      if (opt) sel.value = opt.value;
+      if (opt) { sel.value = opt.value; if (typeof onMotifSelect === 'function') onMotifSelect(sel); }
     }
   }
+  if (typeof validateDetails === 'function') validateDetails();
 }
 
 function clientSignOut() {
@@ -2274,6 +2295,12 @@ function clientSignOut() {
   document.body.classList.remove('authed');
   document.getElementById('authWelcome').style.display = 'none';
   const mb = document.getElementById('myBookingsPanel'); if (mb) mb.style.display = 'none';
+  // Clear anything a previous client's session prefilled, so the next person
+  // (guest or a different client logging in) starts from a clean form.
+  ['clientName','clientEmail','clientContact','eventVenue'].forEach(id => {
+    const el = document.getElementById(id); if (el) el.value = '';
+  });
+  const motif = document.getElementById('colorMotif'); if (motif) motif.selectedIndex = 0;
   window.scrollTo(0,0);
 }
 
@@ -2583,6 +2610,47 @@ function closeMapPicker() {
 document.getElementById('mapPickerOverlay').addEventListener('click', function(e) {
   if (e.target === this) closeMapPicker();
 });
+
+// =============================================================
+//  GLOBAL RESILIENCE — network/offline awareness + error safety net
+//  Catches unhandled promise rejections (e.g. .then() chains without
+//  .catch()) so failures surface to the user instead of hanging.
+// =============================================================
+(function installGlobalResilience(){
+  function notify(msg){
+    if (typeof showToast === 'function') showToast(msg, 'red');
+    else console.error(msg);
+  }
+  window.addEventListener('unhandledrejection', function(ev){
+    var m = (ev.reason && (ev.reason.message || ev.reason)) || 'Unknown error';
+    if (/Failed to fetch|NetworkError|Load failed/i.test(String(m))) {
+      notify(navigator.onLine ? 'Network problem — could not reach the server. Tap ↻ Sync to retry.'
+                              : 'You are offline — changes will not save until the connection returns.');
+    } else {
+      notify('Something went wrong: ' + String(m).slice(0,120));
+    }
+    ev.preventDefault();
+  });
+  window.addEventListener('error', function(ev){
+    if (ev && ev.message && /Script error/i.test(ev.message)) return; // cross-origin noise
+  });
+  // Offline banner
+  function offlineUI(){
+    var id='offlineBanner', el=document.getElementById(id);
+    if (!navigator.onLine) {
+      if (!el) {
+        el=document.createElement('div'); el.id=id;
+        el.style.cssText='position:fixed;top:0;left:0;right:0;z-index:7000;background:#c0603a;color:#fff;text-align:center;padding:0.45rem 1rem;font-size:0.8rem;font-weight:600;';
+        el.textContent='⚠️ You are offline — changes cannot be saved right now.';
+        document.body.appendChild(el);
+      }
+    } else if (el) el.remove();
+  }
+  window.addEventListener('online', offlineUI);
+  window.addEventListener('offline', offlineUI);
+  offlineUI();
+})();
+
 </script>
 
 </body>
